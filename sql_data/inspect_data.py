@@ -39,9 +39,12 @@ def main(argv=None):
 	# Setting logging format and default level
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
-	# Read in DRG_Prices CMS data set
-	drg_prices_csv = './input/drg_prices.csv'
-	drg_data_frame = read_csv(drg_prices_csv, '\t')
+	# Read in DRG_Prices CMS data set.
+	drg_prices_csv = './input/drg_prices.txt'
+	drg_data_frame_b = read_csv(drg_prices_csv, '\t')
+	drg_data_frame = trim_columns(drg_data_frame_b)
+	print('checking for a csv')
+	print(drg_data_frame.head(0))
 	logging.info(msg[0].format(os.path.abspath(drg_prices_csv)))
 
 	# Write DRG Code to a .csv file.
@@ -69,14 +72,17 @@ def main(argv=None):
 	logging.info(msg[4].format(os.path.abspath(prv_zip_csv)))
 
 	# Write Average Covered Charges to a .csv file.
-	drg_charge = extract_filtered_series(drg_data_frame, 'Average Covered Charges')
+	drg_charge = extract_filtered_series(drg_data_frame, ' Average Covered Charges ')
 	drg_charge_csv = './output/drg_charge.csv'
 	write_series_to_csv(drg_charge, drg_charge_csv, '\t', False)
 	logging.info(msg[5].format(os.path.abspath(drg_charge_csv)))
 
 	# Read Hospital Information data (tabbed separator)
-	hospital_info_csv = './input/hospital_info.csv'
-	hospital_data_frame = read_csv(hospital_info_csv, '\t')
+	hospital_info_csv = './input/hospital_info.txt'
+	hospital_data_frame_b = read_csv(hospital_info_csv, '\t')
+	hospital_data_frame = trim_columns(hospital_data_frame_b)
+	print('checking for csv')
+	print(hospital_data_frame.head(0))
 	logging.info(msg[0].format(os.path.abspath(hospital_info_csv)))
 
 	# Write hospital name to a .csv file
@@ -134,13 +140,14 @@ def main(argv=None):
 	logging.info(msg[14].format(os.path.abspath(hosp_readmit_csv)))
 
 	# Read Poverty Information data (tabbed separator)
-	poverty_info_csv = './input/zip_code_designation.csv'
-	poverty_data_frame = read_csv(poverty_info_csv, '\t')
+	poverty_info_csv = './input/zip_code_designation.txt'
+	poverty_data_frame_b = read_csv(poverty_info_csv, '\t')
+	poverty_data_frame = trim_columns(poverty_data_frame_b)
 	logging.info(msg[0].format(os.path.abspath(poverty_info_csv)))
 
 	# Write poverty zip code to a .csv file
 	pov_zip = extract_filtered_series(poverty_data_frame, 'ZIP')
-	pov_zip = './output/pov_zip.csv'
+	pov_zip_csv = './output/pov_zip.csv'
 	write_series_to_csv(pov_zip, pov_zip_csv, '\t', False)
 	logging.info(msg[15].format(os.path.abspath(pov_zip_csv)))
 
@@ -148,7 +155,12 @@ def main(argv=None):
 	pov_des = extract_filtered_series(poverty_data_frame, 'Zip Code Designation')
 	pov_des_csv = './output/pov_des.csv'
 	write_series_to_csv(pov_des, pov_des_csv, '\t', False)
-	logging.info(msg[16].format(os.path.abspath(pov_des_csv)))		
+	logging.info(msg[16].format(os.path.abspath(pov_des_csv)))	
+
+	#clean poverty csv
+	# pov_file = poverty_data_frame
+	# pov_file_csv = './output/zip_code_designation_clean.csv'
+	# write_series_to_csv(pov_file, pov_file_csv, '\t', False)	
 
 def extract_filtered_series(data_frame, column_name):
 	"""
@@ -181,6 +193,14 @@ def write_series_to_csv(series, path, delimiter=',', row_name=True):
 	:param row_name: include row name boolean
 	"""
 	series.to_csv(path, sep=delimiter, index=row_name)
+
+def trim_columns(data_frame):
+	"""
+	:param data_frame:
+	:return: trimmed data frame
+	"""
+	trim = lambda x: x.strip() if type(x) is str else x
+	return data_frame.applymap(trim)
 
 
 if __name__ == '__main__':

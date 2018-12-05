@@ -1,0 +1,76 @@
+SELECT COUNT(city_id) FROM city;
+SELECT * FROM city limit 5;
+
+SELECT COUNT(state_id) FROM state;
+SELECT * FROM state limit 5;
+
+SELECT COUNT(hospital_ownership_id) FROM hospital_ownership;
+SELECT * FROM hospital_ownership;
+
+SELECT COUNT(zip_code_designation_id) FROM zip_code_designation;
+SELECT * FROM zip_code_designation;
+
+SELECT COUNT(drg_charge_amount_id) FROM drg_charge_amount;
+SELECT * FROM drg_charge_amount limit 5;
+
+SELECT COUNT(hospital_quality_score_id) FROM hospital_quality_score;
+SELECT * FROM hospital_quality_score;
+
+SELECT COUNT(hospital_readmission_rate_id) FROM hospital_readmission_rate;
+SELECT * FROM hospital_readmission_rate;
+
+SELECT COUNT(hospital_safety_rating_id) FROM hospital_safety_rating;
+SELECT * FROM hospital_safety_rating;
+
+SELECT COUNT(zip_code_designation_id) FROM zip_code_designation;
+SELECT * FROM zip_code_designation;
+
+SELECT COUNT(zip_code_id) FROM zip_code;
+SELECT * FROM zip_code LIMIT 5;
+
+
+SELECT * FROM temp_zip_code LIMIT 5;
+
+
+
++----------------------------+
+| Tables_in_hospital_pricing |
++----------------------------+
+| city                       |
+| drg_charge_amount          |
+| hospital_ownership         |
+| hospital_quality_score     |
+| hospital_readmission_rate  |
+| hospital_safety_rating     |
+| state                      |
+| temp_hospital              |
+| zip_code                   |
+| zip_code_designation       |
++----------------------------+
+
+
++-------------+-------------+----------------------------------+----------------------------+--------+-------+----------+---------------+---------------------------------------------+-------------------------+------------------------------+------------------------------+------------------------------+-------------------------------+
+| hospital_id | provider_id | hospital_name                    | street_address             | city   | state | zip_code | hospital_type | hospital_ownership                          | hospital_overall_rating | mortality_rating             | safety_rating                | readmission_rate             | effectiveness_score           |
++-------------+-------------+----------------------------------+----------------------------+--------+-------+----------+---------------+---------------------------------------------+-------------------------+------------------------------+------------------------------+------------------------------+-------------------------------+
+|           1 |       10001 | SOUTHEAST ALABAMA MEDICAL CENTER | 1108 ROSS CLARK CIRCLE     | DOTHAN | AL    | 36301    | Acute         | Government - Hospital District or Authority | 3                       | Same as the national average | Above the national average   | Same as the national average | Same as the |ational average
+|           2 |       10005 | MARSHALL MEDICAL CENTER SOUTH    | 2505 U S HIGHWAY 431 NORTH | BOAZ   | AL    | 35957    | Acute         | Government - Hospital District or Authority | 3                       | Below the national average   | Same as the national average | Above the national average   | Same as the |ational average
++-------------+-------------+----------------------------------+----------------------------+--------+-------+----------+---------------+---------------------------------------------+-------------------------+------------------------------+------------------------------+------------------------------+-------------------------------+
+
+
+SELECT th.city, c.city_id, c.city_name
+FROM temp_hospital as th
+	LEFT JOIN city as c
+	ON th.city = c.city_name
+limit 5;
+
+SELECT temp_hospital.hospital_name
+FROM temp_hospital
+ORDER BY city
+LIMIT 5;
+
+
+
+
+
+
+
