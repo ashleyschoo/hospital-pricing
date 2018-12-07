@@ -1,0 +1,15 @@
+django orm
+
+Model = Table??
+
+SELECT RELATED (JOIN)
+	Follows foreign key relationships.
+
+x = Model.objects.select_related('other_model_foreignkeys')
+
+FILTER 
+
+
+views = querysets 
+
+

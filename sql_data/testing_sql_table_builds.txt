@@ -63,11 +63,25 @@ FROM temp_hospital as th
 	ON th.city = c.city_name
 limit 5;
 
-SELECT temp_hospital.hospital_name
+SELECT temp_hospital.city
 FROM temp_hospital
 ORDER BY city
 LIMIT 5;
 
+
+SELECT city_id, city_name, LENGTH(city_name) FROM city limit 10;
+SELECT city, LENGTH(city) FROM temp_hospital order by city limit 10; 
+
+
++---------+------------+
+| city_id | city_name  |
++---------+------------+
+ |      1 | ABBEVILLE
+  |     2 | ABERDEEN
+   |    3 | ABILENE
+  |     4 | ABINGDON
+  |     5 | ABINGTON
++---------+------------+
 
 
 
