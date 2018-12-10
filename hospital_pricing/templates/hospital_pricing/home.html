@@ -1,0 +1,10 @@
+{% extends 'hospital_pricing/base.html' %} <!-- dont touch -->
+{% load static %} <!-- the page looks the same with or without this line -->
+{% block content %}
+<h1>U.S. Hospitals</h1>
+
+<p> Hello World! Ever wonder if you're really getting your bang for your buck at your local hospital? This site compares a hospitals overall quality score to the average amount they charge for Diagnosis Related Code (DRG) 313: Chest Pain</p>
+<!-- https://www.cntraveler.com/galleries/2014-12-23/most-beautiful-unesco-world-heritage-sites-galapagos-taj-mahal-yosemite -->
+<img src='{% static "images/sumner-regional-medical-center-office.jpg" %}' alt="Sumner Medical Center, Gallatin, TN">
+
+{% endblock %}}
