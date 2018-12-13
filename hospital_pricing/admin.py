@@ -42,13 +42,13 @@ class Hospital(admin.ModelAdmin):
 # admin.site.pricing
 @admin.register(models.Pricing)
 class PricingAdmin(admin.ModelAdmin):
-	fields = ['drg_code', 'drg_definition', 
+	fields = ['drg_code', 
 	'charge', 'pricing_provider_identifier', 'zip_code']
 
-	list_display = ['drg_code', 'drg_definition', 
+	list_display = ['drg_code', 
 	'charge', 'pricing_provider_identifier', 'zip_code']
 
-	list_filter = ['drg_code', 'drg_definition', 
+	list_filter = ['drg_code', 
 	'charge', 'pricing_provider_identifier', 'zip_code']
 
 # admin.site.chargeamount
@@ -71,6 +71,20 @@ class City(admin.ModelAdmin):
 	fields = ['city_name']
 	list_display = ['city_name']
 	ordering = ['city_name']
+
+#  admin.site.zip_code
+@admin.register(models.ZipCode)
+class ZipCode(admin.ModelAdmin):
+	fields = ['zip_code']
+	list_display = ['zip_code']
+	ordering = ['zip_code']
+
+#  admin.site.city
+@admin.register(models.DRGCode)
+class DRGCode(admin.ModelAdmin):
+	fields = ['drg_definition']
+	list_display = ['drg_definition']
+	ordering = ['drg_code_id']
 
 #  admin.site.hospitalownership
 @admin.register(models.HospitalOwnership)

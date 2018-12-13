@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'hospital_pricing.apps.HospitalPricingConfig',
     'social_django',
-    'crispy_forms',       
+    'crispy_forms',
+    'django_filters',
+      
 ]
 
 MIDDLEWARE = [

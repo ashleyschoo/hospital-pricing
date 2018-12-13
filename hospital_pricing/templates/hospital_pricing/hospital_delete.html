@@ -1,1 +1,14 @@
-hospital_delete.html 
+{% extends 'hospital_pricing/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+  <form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete the hospital "{{ hospital.hospital_name }}"?</p>
+    <button type="submit" class="btn btn-outline-danger">Delete</button>
+    <a class="btn btn-outline-secondary" href="{% url 'hospital_detail' hospital.pk %}">Cancel</a>
+  </form>
+
+{% endblock content %}

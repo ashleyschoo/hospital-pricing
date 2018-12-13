@@ -1,7 +1,7 @@
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from hospital_pricing.models import Hospital
+from hospital_pricing.models import Hospital, Pricing, HospitalPricing, ChargeAmount
 
 
 class HospitalPricingForm(forms.ModelForm):

@@ -39,6 +39,19 @@ class City(models.Model):
     def __str__(self):
         return self.city_name
 
+class ZipCode(models.Model):
+    zip_code_id = models.AutoField(primary_key=True)
+    zip_code = models.CharField(max_length=10)
+
+    class Meta:
+        managed = False
+        db_table = 'zip_code'
+        ordering = ['zip_code_id']
+        verbose_name = 'Zip Code'
+        verbose_name_plural = 'Zip Codes'
+
+    def __str__(self):
+        return self.zip_code
 
 class Hospital(models.Model):
     hospital_id = models.AutoField(primary_key=True)
@@ -47,7 +60,7 @@ class Hospital(models.Model):
     address = models.CharField(max_length=255)
     city = models.ForeignKey('City', models.DO_NOTHING, blank=True, null=True)
     state = models.ForeignKey('State', models.DO_NOTHING, blank=True, null=True)
-    zip_code = models.CharField(max_length=10)
+    zip_code = models.ForeignKey('ZipCode', models.DO_NOTHING, blank=True, null=True)
     hospital_ownership = models.ForeignKey('HospitalOwnership', models.DO_NOTHING, blank=True, null=True)
     hospital_quality_score = models.ForeignKey('HospitalQualityScore', models.DO_NOTHING, blank=True, null=True)
     # intermediate model (hospital -> hospital_pricing -> pricing)
@@ -71,6 +84,35 @@ class Hospital(models.Model):
 
     pricing_display.short_description = 'Average Amount Charged'
 
+# ask what I would use as a property here
+    # @property
+    # def pricing(self):
+    #     price = self.pricing.select_related('charge').order_by('hospital')
+
+    #     names = []
+    #     for charge in charges:
+    #         name = charges
+    #         if name is None:
+    #             continue
+    #         # quality_score = hospital.drg_code
+
+    #     return ', '.join(names)
+    # @property
+    # def drg_codes(self):
+    #     codes = self.pricing.select_related('hospital_pricing').order_by('hospital_pricing__pricing__drg_code__drg_definition')
+    #     names = []
+    #     for drg_code in codes:
+    #         drg_code = hospital.hospital_pricing.pricing.drg_code
+    #         if drg_code is None:
+    #             continue
+    #         name = drg_code.drg_definition
+    #         if name not in names:
+    #             names.append(name)
+    #     return ', '.join(names)
+
+    
+    
+
 class HospitalOwnership(models.Model):
     hospital_ownership_id = models.AutoField(primary_key=True)
     hospital_ownership_description = models.CharField(unique=True, max_length=150)
@@ -85,16 +127,7 @@ class HospitalOwnership(models.Model):
         return self.hospital_ownership_description
 
 
-class HospitalPricing(models.Model):
-    hospital_pricing_id = models.AutoField(primary_key=True)
-    hospital = models.ForeignKey('Hospital', models.DO_NOTHING)
-    price = models.ForeignKey('Pricing', models.DO_NOTHING)
 
-    class Meta:
-        managed = False
-        db_table = 'hospital_pricing'
-        ordering = ['hospital','price']
-        verbose_name = 'Hospital Pricing'
 
 
 class HospitalQualityScore(models.Model):
@@ -116,16 +149,30 @@ class Pricing(models.Model):
     price_id = models.AutoField(primary_key=True)
     pricing_provider_identifier = models.CharField(unique=True, max_length=6)
     charge = models.ForeignKey('ChargeAmount', models.DO_NOTHING, blank=True, null=True)
-    drg_code = models.CharField(max_length=3, blank=True, null=True)
-    drg_definition = models.CharField(max_length=20, blank=True, null=True)
-    zip_code = models.CharField(max_length=10)
+    drg_code = models.ForeignKey('DRGCode', models.DO_NOTHING)
+    zip_code = models.ForeignKey('ZipCode', models.DO_NOTHING)
 
     class Meta:
         managed = False
         db_table = 'pricing'
         ordering = ['pricing_provider_identifier']
-        verbose_name = 'Pricing for Diagnosis Related Code: 313, Chest Pain'
+        verbose_name = 'Pricing'
+    def __str__(self):
+        return self.charge.charge_amount
 
+class DRGCode(models.Model):
+    drg_code_id = models.AutoField(primary_key=True)
+    drg_definition = models.CharField(max_length = 200)
+
+    class Meta:
+        managed = False
+        db_table = 'drg_code'
+        ordering = ['drg_code_id']
+        verbose_name = 'DRG Code'
+        verbose_name_plural = 'DRG Codes'
+
+    def __str__(self):
+        return self.drg_definition
 
 
 class State(models.Model):
@@ -141,3 +188,15 @@ class State(models.Model):
 
     def __str__(self):
         return self.state
+
+
+class HospitalPricing(models.Model):
+    hospital_pricing_id = models.AutoField(primary_key=True)
+    hospital = models.ForeignKey('Hospital', models.DO_NOTHING)
+    price = models.ForeignKey('Pricing', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'hospital_pricing'
+        ordering = ['hospital','price']
+        verbose_name = 'Hospital Pricing'

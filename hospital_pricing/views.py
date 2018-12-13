@@ -7,12 +7,19 @@ from django.views.generic.edit import FormView, CreateView, DeleteView, UpdateVi
 from django.urls import reverse_lazy
 from django.forms import ModelForm
 from hospital_pricing.forms import forms
-# import django_filters
-# from django_filters.views import FilterView
+import django_filters
+from django_filters.views import FilterView
 from django.conf.urls import url
-# Create your views here.
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django_filters.views import FilterView
+
+
 from .models import Hospital
+from .models import HospitalPricing
+from .models import Pricing
 from .forms import HospitalPricingForm
+from .filters import HospitalFilterView
+
 
 
 
@@ -26,6 +33,28 @@ class HomePageView(generic.TemplateView):
 class AboutPageView(generic.TemplateView):
 	template_name = 'hospital_pricing/about.html'
 
+class PaginatedFilterView(generic.View):
+	"""
+	Creates a view mixin, which separates out default 'page' keyword and returns the
+	remaining querystring as a new template context variable.
+	https://stackoverflow.com/questions/51389848/how-can-i-use-pagination-with-django-filter
+	"""
+	def get_context_data(self, **kwargs):
+		context = super(PaginatedFilterView, self).get_context_data(**kwargs)
+		if self.request.GET:
+			querystring = self.request.GET.copy()
+			if self.request.GET.get('page'):
+				del querystring['page']
+			context['querystring'] = querystring.urlencode()
+		return context
+
+
+class HospitalFilterView(PaginatedFilterView, FilterView):
+	model = Hospital
+	filterset_class = HospitalFilterView
+	template_name = 'hospital_pricing/hospital_filter.html'
+	context_object_name = 'hospitals'
+	paginate_by = 30
 
 @method_decorator(login_required, name='dispatch')
 class HospitalListView(generic.ListView): 
@@ -67,12 +96,12 @@ class HospitalCreateView(generic.View):
 	def post(self, request):
 		form = HospitalPricingForm(request.POST)
 		if form.is_valid():
-			site = form.save(commit=False)
-			site.save()
-			for charge in form.cleaned_data['hospital']:
-				HospitalPricing.objects.create(hospital=site, pricing=charge)
-			return redirect(site) # shortcut to object's get_absolute_url()
-			# return HttpResponseRedirect(site.get_absolute_url())
+			hospital = form.save(commit=False)
+			hospital.save()
+			for charge in form.cleaned_data['hospitals']:
+				HospitalPricing.objects.create(hospital=hospital, pricing=charge)
+			return redirect(hospital) # shortcut to object's get_absolute_url()
+			# return HttpResponseRedirect(hospital.get_absolute_url())
 		return render(request, 'hospital_pricing/hospital_new.html', {'form': form})
 
 	def get(self, request):
@@ -83,31 +112,31 @@ class HospitalCreateView(generic.View):
 
 
 @method_decorator(login_required, name='dispatch')
-class SiteUpdateView(generic.UpdateView):
-	model = HeritageSite
-	form_class = HeritageSiteForm
+class HospitalUpdateView(generic.UpdateView):
+	model = Hospital
+	form_class = HospitalPricingForm
 	# fields = '__all__' <-- superseded by form_class
-	context_object_name = 'site'
+	context_object_name = 'hospitals'
 	# pk_url_kwarg = 'site_pk'
-	success_message = "Heritage Site updated successfully"
-	template_name = 'heritagesites/site_update.html'
+	success_message = "Hospital updated successfully"
+	template_name = 'hospital_pricing/hospital_update.html'
 
 	def dispatch(self, *args, **kwargs):
 		return super().dispatch(*args, **kwargs)
 
 	def form_valid(self, form):
-		site = form.save(commit=False)
-		# site.updated_by = self.request.user
-		# site.date_updated = timezone.now()
-		site.save()
+		hospital = form.save(commit=False)
+		# hospital.updated_by = self.request.user
+		# hospital.date_updated = timezone.now()
+		hospital.save()
 
-		# Current country_area_id values linked to site
-		old_ids = HeritageSiteJurisdiction.objects\
-			.values_list('country_area_id', flat=True)\
-			.filter(heritage_site_id=site.heritage_site_id)
+		# Current pricing_id values linked to site
+		old_ids = HospitalPricing.objects\
+			.values_list('hospital_id', flat=True)\
+			.filter(hospital_id=hospital.hospital_id)
 
-		# New countries list
-		new_countries = form.cleaned_data['country_area']
+		# New hospital list
+		new_hospital = form.cleaned_data['hospital']
 
 		# TODO can these loops be refactored?
 
@@ -115,23 +144,49 @@ class SiteUpdateView(generic.UpdateView):
 		new_ids = []
 
 		# Insert new unmatched country entries
-		for country in new_countries:
-			new_id = country.country_area_id
+		for hospital in new_hospital:
+			new_id = hospital.hospital_id
 			new_ids.append(new_id)
 			if new_id in old_ids:
 				continue
 			else:
-				HeritageSiteJurisdiction.objects \
-					.create(heritage_site=site, country_area=country)
+				HospitalPricing.objects \
+					.create(hospital=hospital, pricing=charge)
 
 		# Delete old unmatched country entries
 		for old_id in old_ids:
 			if old_id in new_ids:
 				continue
 			else:
-				HeritageSiteJurisdiction.objects \
-					.filter(heritage_site_id=site.heritage_site_id, country_area_id=old_id) \
+				HospitalPricing.objects \
+					.filter(hospital_id=hospital.hospital_id, pricing_id=old_id) \
 					.delete()
 
-		return HttpResponseRedirect(site.get_absolute_url())
-		# return redirect('heritagesites/site_detail', pk=site.pk)
+		return HttpResponseRedirect(hospital.get_absolute_url())
+		# return redirect('hospital/hospital_detail', pk=site.pk)
+
+
+@method_decorator(login_required, name='dispatch')
+class HospitalDeleteView(generic.DeleteView):
+	model = Hospital
+	success_message = "Hospital deleted successfully"
+	success_url = reverse_lazy('hospital')
+	context_object_name = 'hospitals'
+	template_name = 'hospital_pricing/site_delete.html'
+
+	def dispatch(self, *args, **kwargs):
+		return super().dispatch(*args, **kwargs)
+
+	def delete(self, request, *args, **kwargs):
+		self.object = self.get_object()
+
+		# Delete HeritageSiteJurisdiction entries
+		HospitalPricing.objects \
+			.filter(hospital_id=self.object.hospital_id) \
+			.delete()
+
+		self.object.delete()
+
+		return HttpResponseRedirect(self.get_success_url())
+
+

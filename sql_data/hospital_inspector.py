@@ -105,14 +105,19 @@ def main(argv=None):
 
 	pricing_data_frame = trim_columns(pricing_data_frame_b)
 	csv = 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/pricing_trimmed.csv'
-	write_series_to_csv(pricing_data_frame, csv, ',', False)
+	# write_series_to_csv(pricing_data_frame, csv, ',', False)
 	logging.info(msg[0].format(os.path.abspath(pricing_csv)))
 
 
 	price = extract_filtered_series(pricing_data_frame, [' Average Covered Charges '])
 	price_csv = 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/price.csv'
-	write_series_to_csv(price, price_csv, ',', False)
+	# write_series_to_csv(price, price_csv, ',', False)
 	logging.info(msg[12].format(os.path.abspath(price_csv)))
+
+	drg_code = extract_filtered_series(pricing_data_frame, ['DRG Definition'])
+	drg_csv = 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/drg.csv'
+	write_series_to_csv(drg_code, drg_csv, ',', False)
+	logging.info(msg[12].format(os.path.abspath(drg_csv)))
 
 
 	# Unused columns due to encoding problem

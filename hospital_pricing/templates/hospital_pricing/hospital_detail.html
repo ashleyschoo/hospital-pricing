@@ -1,110 +1,120 @@
 {% extends 'hospital_pricing/base.html' %}
-<!-- {% load static %} -->
+{% load hospital_pricing_extras %}
+
+   
+   <!-- safe filter on for raw HTML stored in database -->
 {% block content %}
-	{% if user.is_authenticated %}
+     <header>
+       <div class="row">
+         <div class="col-sm-10">
+           <h2>{{ hospital.hospital_name | safe }}</h2>
+         </div>
+         <div class="col-xs-1">
+           {% if user.is_authenticated %}
+             <a class="btn btn-outline-secondary" href="{% url 'hospital_update' hospital.pk %}">Edit</a>
+           {% endif %}
+         </div>
+         <div class="col-xs-1">
+           {% if user.is_authenticated %}
+             &nbsp;<a class="btn btn-outline-warning" href="{% url 'hospital_delete' hospital.pk %}">Delete</a>
+           {% endif %}
+         </div>
+       </div>
+     </header>
 
-		<h2>{{hospital.hospital_name | safe}}</h2>
-
-		{% if hospital.address %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>Address</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.address }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.city %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>City</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.city }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.state %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>State</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.state }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.zip_code %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>Zip Code</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.zip_code }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.pricing %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>Average Amount Charged</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.pricing.charge_amount.charge  }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.hospital_ownership.hospital_ownership_description %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>Hospital Ownership</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.hospital_ownership.hospital_ownership_description }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.hospital_quality_score.hospital_quality_score %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>Overall Quality Score</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.hospital_quality_score.hospital_quality_score }}
-		 	</div>
-		 </div>
-		{% endif %}
-
-		{% if hospital.hospital_pricing.pricing.drg_code %}
-		 <div class="row">
-		 	<div class= "col-sm-2">
-		 		<p>DRG Code</p>
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.hospital_pricing.pricing.drg_code }}
-		 	</div>
-		 	<div class="col-sm-10">
-		 		{{ hospital.hospital_pricing.pricing.drg_definition }}
-		 	</div>		 	
-
-		 </div>
-		{% endif %}
+{% if hospital.pricing %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p> Average Amount Charged </p>
+      </div>
+      <div class="col-sm-10">
+        {% for pricing in hospital.pricing.all %}
+        <p>{{pricing.drg_code.drg_definition}}, ${{ pricing.charge.charge}}</p>
+        {% endfor %}
+      </div>
+    </div> 
+  {% endif %}
 
 
+{% if hospital.address %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p>Address</p>
+      </div>
+      <div class="col-sm-10">
+        <p>{{ hospital.address }}</p>
+      </div>
+    </div>
+  {% endif %}
+
+{% if hospital.city %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p>City</p>
+      </div>
+      <div class="col-sm-10">
+        <p>{{ hospital.city }}</p>
+      </div>
+    </div>
+  {% endif %}
 
 
+{% if hospital.state %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p>State</p>
+      </div>
+      <div class="col-sm-10">
+        <p>{{ hospital.state }}</p>
+      </div>
+    </div>
+  {% endif %}
+
+{% if hospital.zip_code %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p>Zip Code</p>
+      </div>
+      <div class="col-sm-10">
+        <p>{{ hospital.zip_code }}</p>
+      </div>
+    </div>
+  {% endif %}
+
+    
+     {% if hospital.hospital_ownership.hospital_ownership_description %}
+       <div class="row">
+         <div class="col-sm-2">
+           <p>Hospital Ownership</p>
+         </div>
+         <div class="col-sm-10">
+           {{ hospital.hospital_ownership.hospital_ownership_description | safe }}
+         </div>
+       </div>
+     {% endif %}
+   
+     {% if hospital.hospital_quality_score.hospital_quality_score %}
+       <div class="row">
+         <div class="col-sm-2">
+           <p>Overall Quality Score</p>
+         </div>
+         <div class="col-sm-10">
+           {{ hospital.hospital_quality_score.hospital_quality_score | safe }}
+         </div>
+       </div>
+     {% endif %}
+   
+     {% if hospital.drg_codes %}
+       <div class="row">
+         <div class="col-sm-2">
+           <p>drg_codes</p>
+         </div>
+         <div class="col-sm-10">
+           {{ hospital.drg_codes | safe }}
+         </div>
+       </div>
+     {% endif %}
+  
 
 
-		{% else %}
-	   	 <a href="{% url 'login' %}">Log in</a>
-	  	{% endif %}
-
-
-{% endblock content %}}
+{% endblock %}

@@ -1,1 +1,77 @@
-hospital_update.html 
+<!-- Restore missing template tags -->
+{% extends 'hospital_pricing/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+  <header>
+    <h2>Hospital Update</h2>
+  </header>
+
+  <!-- novalidate attribute required to render validation messages -->
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-6">
+        {{ form.hospital_provider_identifier|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6">
+        {{ form.hospital_name |as_crispy_field }}
+      </div>
+    </div>
+
+<!-- address -->
+    <div class="row">
+      <div class="col-6">
+        {{ form.address|as_crispy_field }}
+      </div>
+    </div>
+<!-- city -->
+    <div class="row">
+      <div class="col-6">
+        {{ form.city|as_crispy_field }}
+      </div>
+    </div>
+<!-- state-->
+    <div class="row">
+      <div class="col-6">
+        {{ form.state|as_crispy_field }}
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-6">
+        {{ form.zip_code|as_crispy_field }}
+      </div>
+    </div>
+
+<!-- ask how to do this with foreign keys
+ -->
+
+
+    <div class="row">
+      <div class="col-6">
+        {{ form.hospital_ownership|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6">
+        {{ form.hospital_quality_score|as_crispy_field }}
+      </div>
+    </div>
+
+
+
+  <button type="submit" class="btn btn-outline-success">Update</button>
+  <!-- Restore missing button -->  
+    &nbsp;<a class="btn btn-outline-secondary" href="{% url 'hospital_filter' %}">Cancel</a>
+
+</form>
+
+{% endblock content %}

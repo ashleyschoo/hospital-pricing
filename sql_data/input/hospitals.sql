@@ -8,8 +8,8 @@
 -- 1.0 Setup. Delete tables after every build iteration.
 --
 SET FOREIGN_KEY_CHECKS=0;
-DROP TABLE IF EXISTS city, state, zip_code, hospital, temp_hospital, hospital_ownership, hospital_quality_score, hospital_pricing,
-temp_pricing, charge_amount, pricing;
+DROP TABLE IF EXISTS city, state, zip_code, hospital, temp_hospital, hospital_ownership, hospital_quality_score,
+ hospital_pricing, temp_pricing, charge_amount, pricing, drg_code;
 SET FOREIGN_KEY_CHECKS=1;
 
 --
@@ -25,12 +25,12 @@ SET FOREIGN_KEY_CHECKS=1;
 -- 2.1 temp_hospital table
 CREATE TABLE IF NOT EXISTS temp_hospital (
   hospital_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  hospital_provider_identifier CHAR(6) NOT NULL UNIQUE,
+  hospital_provider_identifier CHAR(6) NOT NULL,
   hospital_name VARCHAR(255) NOT NULL,
   address VARCHAR(255) NULL,
   city_name VARCHAR(255) NULL,
   state CHAR(2) NULL,
-  zip_code CHAR(10) NULL,
+  zip_code CHAR(10) NOT NULL,
   hospital_ownership VARCHAR(150) NULL,
   hospital_quality_score VARCHAR(20),
   PRIMARY KEY (hospital_id)
@@ -162,7 +162,7 @@ INSERT INTO hospital_quality_score (hospital_quality_score) VALUES
  
 CREATE TABLE IF NOT EXISTS hospital (
   hospital_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  hospital_provider_identifier CHAR(6) NOT NULL UNIQUE,
+  hospital_provider_identifier CHAR(6) NOT NULL,
   hospital_name VARCHAR(255) NOT NULL,
   address VARCHAR(255) NOT NULL,
   city_id INTEGER NOT NULL,
@@ -191,7 +191,7 @@ INSERT IGNORE INTO hospital (
       hospital_ownership_id,
       hospital_quality_score_id
 )
-SELECT th.hospital_provider_identifier, th.hospital_name, th.address, cit.city_id, s.state_id, z.zip_code, 
+SELECT th.hospital_provider_identifier, th.hospital_name, th.address, cit.city_id, s.state_id, z.zip_code_id, 
         ho.hospital_ownership_id, hq.hospital_quality_score_id
   FROM temp_hospital th
         LEFT JOIN city cit
@@ -261,18 +261,35 @@ INTO TABLE charge_amount
   IGNORE 1 LINES
   (charge);
 
+-- 3.3 drg table
+CREATE TABLE IF NOT EXISTS drg_code (
+  drg_code_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  drg_definition CHAR(200) NOT NULL UNIQUE,
+  PRIMARY KEY (drg_code_id)
+)
+ENGINE=InnoDB
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_0900_ai_ci;
 
--- 3.3 pricing table 
+INSERT INTO drg_code (drg_definition) VALUES
+  ('101 - SEIZURES W/O MCC'),
+  ('203 - BRONCHITIS & ASTHMA W/O CC/MCC'),
+  ('313 - CHEST PAIN');
+
+
+
+-- 3.4 pricing table 
 
 CREATE TABLE IF NOT EXISTS pricing (
   price_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  pricing_provider_identifier CHAR(6) NOT NULL UNIQUE,
+  pricing_provider_identifier CHAR(6) NOT NULL,
   charge_id INTEGER(10) NOT NULL,
-  drg_code VARCHAR(3) DEFAULT '313',
-  drg_definition CHAR(20) DEFAULT 'Chest Pain',
-  zip_code CHAR(10) NOT NULL,
+  drg_code_id INTEGER(3) NOT NULL,
+  zip_code_id INTEGER(10),
   PRIMARY KEY (price_id),
-  FOREIGN KEY (charge_id) REFERENCES charge_amount(charge_id) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (charge_id) REFERENCES charge_amount(charge_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (zip_code_id) REFERENCES zip_code(zip_code_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (drg_code_id) REFERENCES drg_code(drg_code_id) ON DELETE CASCADE ON UPDATE CASCADE
 )
 ENGINE=InnoDB
 CHARACTER SET utf8mb4
@@ -280,15 +297,19 @@ COLLATE utf8mb4_0900_ai_ci;
 
 INSERT IGNORE INTO pricing (
       pricing_provider_identifier,
-      charge_id,
-      zip_code
+      charge_id, drg_code_id,
+      zip_code_id
 )
 SELECT tp.pricing_provider_identifier,
-       ch.charge_id, tp.zip_code
+       ch.charge_id, drg.drg_code_id, zp.zip_code_id
   FROM temp_pricing tp
        LEFT JOIN charge_amount ch
               ON TRIM(tp.price) = TRIM(ch.charge)
-  WHERE tp.drg_definition = '313 - CHEST PAIN'
+        LEFT JOIN drg_code drg
+              ON TRIM(drg.drg_definition) = TRIM(tp.drg_definition)
+        LEFT JOIN zip_code zp
+              ON TRIM(zp.zip_code) = TRIM(tp.zip_code)
+  WHERE tp.drg_definition  IN ('101 - SEIZURES W/O MCC','203 - BRONCHITIS & ASTHMA W/O CC/MCC','313 - CHEST PAIN') 
 ORDER BY tp.pricing_provider_identifier;
 
 
@@ -314,5 +335,5 @@ SELECT h.hospital_id, p.price_id
   ORDER BY h.hospital_provider_identifier;
 
 
-DROP TABLE temp_hospital;
-DROP TABLE temp_pricing;
+-- DROP TABLE temp_hospital;
+-- DROP TABLE temp_pricing;
