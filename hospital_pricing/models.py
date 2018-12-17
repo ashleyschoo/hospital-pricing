@@ -158,7 +158,8 @@ class Pricing(models.Model):
         ordering = ['pricing_provider_identifier']
         verbose_name = 'Pricing'
     def __str__(self):
-        return self.charge.charge_amount
+        charge = str(self.charge.charge)
+        return charge
 
 class DRGCode(models.Model):
     drg_code_id = models.AutoField(primary_key=True)

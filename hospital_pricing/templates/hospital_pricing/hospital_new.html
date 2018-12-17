@@ -11,7 +11,10 @@
   <!-- novalidate attribute required to render validation messages -->
   <form method="post" novalidate>
     {% csrf_token %}
-    <div class="row">
+
+    {{form | crispy }}
+
+<!--     <div class="row">
       <div class="col-6">
         {{ form.hospital_provider_identifier|as_crispy_field }}
       </div>
@@ -23,20 +26,19 @@
       </div>
     </div>
 
-<!-- address -->
     <div class="row">
       <div class="col-6">
         {{ form.address|as_crispy_field }}
       </div>
     </div>
-<!-- city -->
-    <div class="row">
+
+   <div class="row">
       <div class="col-6">
         {{ form.city|as_crispy_field }}
       </div>
-    </div>
+    </div> -->
 <!-- state-->
-    <div class="row">
+<!--     <div class="row">
       <div class="col-6">
         {{ form.state|as_crispy_field }}
       </div>
@@ -47,12 +49,12 @@
       <div class="col-6">
         {{ form.zip_code|as_crispy_field }}
       </div>
-    </div>
+    </div> -->
 
 <!-- ask how to do this with foreign keys
  -->
 
-
+<!-- 
     <div class="row">
       <div class="col-6">
         {{ form.hospital_ownership|as_crispy_field }}
@@ -63,7 +65,8 @@
       <div class="col-6">
         {{ form.hospital_quality_score|as_crispy_field }}
       </div>
-    </div>
+    </div> 
+ -->
 
     <button type="submit" class="btn btn-outline-success">Add</button>
     &nbsp;<a class="btn btn-outline-secondary" href="{% url 'hospital_filter' %}">Cancel</a>

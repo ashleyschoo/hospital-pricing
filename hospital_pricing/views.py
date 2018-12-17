@@ -61,7 +61,7 @@ class HospitalListView(generic.ListView):
 	model = Hospital
 	context_object_name = 'hospitals'
 	template_name = 'hospital_pricing/hospital.html'
-	paginate_by = 20
+	paginate_by = 250
 
 	def dispatch(self, *args, **kwargs):
 		return super().dispatch(*args, **kwargs)
@@ -87,8 +87,6 @@ class HospitalCreateView(generic.View):
 	form_class = HospitalPricingForm
 	success_message = "Hospital created successfully"
 	template_name = 'hospital/hospital_new.html'
-	# fields = '__all__' <-- superseded by form_class
-	# success_url = reverse_lazy('heritagesites/site_list')
 
 	def dispatch(self, *args, **kwargs):
 		return super().dispatch(*args, **kwargs)
@@ -98,10 +96,11 @@ class HospitalCreateView(generic.View):
 		if form.is_valid():
 			hospital = form.save(commit=False)
 			hospital.save()
-			for charge in form.cleaned_data['hospitals']:
-				HospitalPricing.objects.create(hospital=hospital, pricing=charge)
-			return redirect(hospital) # shortcut to object's get_absolute_url()
-			# return HttpResponseRedirect(hospital.get_absolute_url())
+
+			# for hospital in form.cleaned_data:
+			# 	HospitalPricing.objects.create(hospital=hospital, pricing=pricing)
+			# return redirect(hospital) # shortcut to object's get_absolute_url()
+			return HttpResponseRedirect(hospital.get_absolute_url())
 		return render(request, 'hospital_pricing/hospital_new.html', {'form': form})
 
 	def get(self, request):
@@ -116,7 +115,7 @@ class HospitalUpdateView(generic.UpdateView):
 	model = Hospital
 	form_class = HospitalPricingForm
 	# fields = '__all__' <-- superseded by form_class
-	context_object_name = 'hospitals'
+	context_object_name = 'hospital'
 	# pk_url_kwarg = 'site_pk'
 	success_message = "Hospital updated successfully"
 	template_name = 'hospital_pricing/hospital_update.html'
@@ -126,6 +125,7 @@ class HospitalUpdateView(generic.UpdateView):
 
 	def form_valid(self, form):
 		hospital = form.save(commit=False)
+		print(form.cleaned_data.keys())
 		# hospital.updated_by = self.request.user
 		# hospital.date_updated = timezone.now()
 		hospital.save()
@@ -136,31 +136,31 @@ class HospitalUpdateView(generic.UpdateView):
 			.filter(hospital_id=hospital.hospital_id)
 
 		# New hospital list
-		new_hospital = form.cleaned_data['hospital']
+		new_hospital = form.cleaned_data['pricing']
 
 		# TODO can these loops be refactored?
 
 		# New ids
 		new_ids = []
 
-		# Insert new unmatched country entries
-		for hospital in new_hospital:
-			new_id = hospital.hospital_id
-			new_ids.append(new_id)
-			if new_id in old_ids:
-				continue
-			else:
-				HospitalPricing.objects \
-					.create(hospital=hospital, pricing=charge)
+		# # Insert new unmatched country entries
+		# for hospital in new_hospital:
+		# 	new_id = hospital.hospital_id
+		# 	new_ids.append(new_id)
+		# 	if new_id in old_ids:
+		# 		continue
+		# 	else:
+		# 		HospitalPricing.objects \
+		# 			.create(hospital=hospital_id, pricing=pricing.charge_id)
 
-		# Delete old unmatched country entries
-		for old_id in old_ids:
-			if old_id in new_ids:
-				continue
-			else:
-				HospitalPricing.objects \
-					.filter(hospital_id=hospital.hospital_id, pricing_id=old_id) \
-					.delete()
+		# # Delete old unmatched country entries
+		# for old_id in old_ids:
+		# 	if old_id in new_ids:
+		# 		continue
+		# 	else:
+		# 		HospitalPricing.objects \
+		# 			.filter(hospital_id=hospital.hospital_id, pricing_id=old_id) \
+		# 			.delete()
 
 		return HttpResponseRedirect(hospital.get_absolute_url())
 		# return redirect('hospital/hospital_detail', pk=site.pk)
@@ -172,7 +172,7 @@ class HospitalDeleteView(generic.DeleteView):
 	success_message = "Hospital deleted successfully"
 	success_url = reverse_lazy('hospital')
 	context_object_name = 'hospitals'
-	template_name = 'hospital_pricing/site_delete.html'
+	template_name = 'hospital_pricing/hospital_delete.html'
 
 	def dispatch(self, *args, **kwargs):
 		return super().dispatch(*args, **kwargs)
