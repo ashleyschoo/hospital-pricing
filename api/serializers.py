@@ -89,36 +89,37 @@ class HospitalSerializer(serializers.ModelSerializer):
 		read_only=True
 		)
 	zip_code_id = serializers.PrimaryKeyRelatedField(
-		many=True,
+		many=False,
 		write_only=True,
 		queryset=ZipCode.objects.all(),
+		source='zip_code'
 	)
 
 	hospital_ownership = HospitalOwnershipSerializer(
 		many=False,
 		read_only=True
 		)
-	hospital_ownership_id = serializers.PrimaryKeyRelatedField(
-		many=True,
-		write_only=True,
-		queryset=HospitalOwnership.objects.all(),
-	)
+	# hospital_ownership_id = serializers.PrimaryKeyRelatedField(
+	# 	many=False,
+	# 	write_only=True,
+	# 	queryset=HospitalOwnership.objects.all(),
+	# )
 
 	hospital_quality_score = HospitalQualityScoreSerializer(
 		many=False,
 		read_only=True
 		)
-	hospital_quality_score_id = serializers.PrimaryKeyRelatedField(
-		many=True,
-		write_only=True,
-		queryset=HospitalQualityScore.objects.all(),
-	)
+	# hospital_quality_score_id = serializers.PrimaryKeyRelatedField(
+	# 	many=False,
+	# 	write_only=True,
+	# 	queryset=HospitalQualityScore.objects.all(),
+	# )
 
-	drg_codes = serializers.PrimaryKeyRelatedField(
-		many=True,
-		write_only=True,
-		queryset=Pricing.objects.all(),
-	)
+	# drg_codes = serializers.PrimaryKeyRelatedField(
+	# 	many=True,
+	# 	write_only=True,
+	# 	queryset=Pricing.objects.all(),
+	# )
 
 	class Meta:
 		model = Hospital
@@ -134,10 +135,10 @@ class HospitalSerializer(serializers.ModelSerializer):
 			'zip_code',
 			'zip_code_id',
 			'hospital_ownership',
-			'hospital_ownership_id',
+			# 'hospital_ownership_id',
 			'hospital_quality_score',
-			'hospital_quality_score_id',
-			'drg_codes'
+			# 'hospital_quality_score_id',
+
 		)
 
 	def create(self, validated_data):
@@ -154,19 +155,18 @@ class HospitalSerializer(serializers.ModelSerializer):
 
 		# print(validated_data)
 
-		hospital_tbl = validated_data.pop('hospital')  #many to many table here
+		# hospital_tbl = validated_data.pop('hospital')  #many to many table here
 		hospital = Hospital.objects.create(**validated_data)
 
-		if hospital_tbl is not None:
-			for hosp in hospital_tbl:
-				Hospital.objects.create(
-					hospital_id=hospital_id
-				)
+		# if hospital_tbl is not None:
+		# 	for hosp in hospital_tbl:
+		# 		Hospital.objects.create(
+		# 			hospital_id=hospital_id
+		# 		)
 		return hospital
 
 	def update(self, instance, validated_data):
 		hospital_id = instance.hospital_id
-		new_hospitals = validated_data.pop('hospital_name') #many to many table
 
 		instance.hospital_name = validated_data.get(
 			'hospital_name',
@@ -180,56 +180,56 @@ class HospitalSerializer(serializers.ModelSerializer):
 			'address',
 			instance.address
 		)
-		instance.city_id = validated_data.get(
-			'city_id',
-			instance.city_id
-		)
-		instance.state_id = validated_data.get(
-			'state_id',
-			instance.state_id
-		)
-		instance.zip_code_id = validated_data.get(
-			'zip_code_id',
-			instance.zip_code_id
-		)
-		instance.hospital_ownership_id = validated_data.get(
-			'hospital_ownership_id',
-			instance.hospital_ownership_id
-		)
-		instance.hospital_quality_score_id = validated_data.get(
-			'hospital_quality_score_id',
-			instance.hospital_quality_score_id
-		)
+		# instance.city_id = validated_data.get(
+		# 	'city_id',
+		# 	instance.city_id
+		# )
+		# instance.state_id = validated_data.get(
+		# 	'state_id',
+		# 	instance.state_id
+		# )
+		# instance.zip_code_id = validated_data.get(
+		# 	'zip_code_id',
+		# 	instance.zip_code_id
+		# )
+		# instance.hospital_ownership_id = validated_data.get(
+		# 	'hospital_ownership_id',
+		# 	instance.hospital_ownership_id
+		# )
+		# instance.hospital_quality_score_id = validated_data.get(
+		# 	'hospital_quality_score_id',
+		# 	instance.hospital_quality_score_id
+		# )
 		instance.save()
 
 		# If any existing country/areas are not in updated list, delete them
-		new_ids = []
-		old_ids = Hospital.objects \
-			.values_list('hospital_id', flat=True) \
-			.filter(hospital_id__exact=hospital_id)
+		# new_ids = []
+		# old_ids = Hospital.objects \
+		# 	.values_list('hospital_id', flat=True) \
+		# 	.filter(hospital_id__exact=hospital_id)
 
-		# TODO Insert may not be required (Just return instance)
+		# # TODO Insert may not be required (Just return instance)
 
-		# Insert new unmatched country entries
-		for price in new_prices:
-			new_id = pricing.price_id
-			new_ids.append(new_id)
-			if new_id in old_ids:
-				continue
-			else:
-				Hospital.objects \
-					.create(hospital_id=hospital_id, pricing_id=new_id)
+		# # Insert new unmatched country entries
+		# for price in new_prices:
+		# 	new_id = pricing.price_id
+		# 	new_ids.append(new_id)
+		# 	if new_id in old_ids:
+		# 		continue
+		# 	else:
+		# 		Hospital.objects \
+		# 			.create(hospital_id=hospital_id, pricing_id=new_id)
 
-		# Delete old unmatched country entries
-		for old_id in old_ids:
-			if old_id in new_ids:
-				continue
-			else:
-				Hospital.objects \
-					.filter(hospital_id=hospital_id, pricing_id=old_id) \
-					.delete()
+		# # Delete old unmatched country entries
+		# for old_id in old_ids:
+		# 	if old_id in new_ids:
+		# 		continue
+		# 	else:
+		# 		Hospital.objects \
+		# 			.filter(hospital_id=hospital_id, pricing_id=old_id) \
+		# 			.delete()
 
-		return instance
+		# return instance
 
 
 
