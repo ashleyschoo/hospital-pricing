@@ -1,5 +1,5 @@
-from hospital_pricing.models import Hospital, Pricing, HospitalPricing, City, \
-	State, ChargeAmount, HospitalOwnership, HospitalQualityScore, ZipCode, DRGCode
+from hospital_pricing.models import Hospital, Pricing, City, \
+	State, HospitalOwnership, HospitalQualityScore, ZipCode, DRGCode
 from rest_framework import response, serializers, status
 
 
@@ -44,38 +44,9 @@ class HospitalQualityScoreSerializer(serializers.ModelSerializer):
 
 
 
-class ChargeAmountSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = ChargeAmount
-		fields = ('charge_id', 'charge')
-
-
-class PricingSerializer(serializers.ModelSerializer):
-	charge = ChargeAmountSerializer(many=False, read_only=True)
-	drg_code = DRGCodeSerializer(many=False, read_only=True)
-	zip_code = ZipCodeSerializer(many=False, read_only=True)
-
-	class Meta:
-		model = Pricing
-		fields = (
-			'price_id',
-			'pricing_provider_identifier',
-			'charge',
-			'drg_code',
-			'zip_code')
 
 
 
-
-
-class HospitalPricingSerializer(serializers.ModelSerializer):
-	hospital = serializers.ReadOnlyField(source='hospital.hospital_id')
-	price = serializers.ReadOnlyField(source='pricing.price_id')
-
-	class Meta:
-		model = HospitalPricing
-		fields = ('hospital_pricing_id', 'hospital', 'price')
 
 
 class HospitalSerializer(serializers.ModelSerializer):
@@ -89,11 +60,12 @@ class HospitalSerializer(serializers.ModelSerializer):
 	address = serializers.CharField(
 		allow_blank=True
 	)
+
 	city = CitySerializer(
 		many=False,
 		read_only=True
 	)
-	city_ids = serializers.PrimaryKeyRelatedField(
+	city_id = serializers.PrimaryKeyRelatedField(
 		allow_null=False,
 		many=False,
 		write_only=True,
@@ -101,33 +73,51 @@ class HospitalSerializer(serializers.ModelSerializer):
 		source='city'
 	)
 
-
-	state_ids = serializers.PrimaryKeyRelatedField(
-		many=True,
+	state = StateSerializer(
+		many=False,
+		read_only=True
+		)
+	state_id = serializers.PrimaryKeyRelatedField(
+		many=False,
 		write_only=True,
 		queryset=State.objects.all(),
 		source='state'
 	)
 
-	zip_code_ids = serializers.PrimaryKeyRelatedField(
+	zip_code = ZipCodeSerializer(
+		many=False,
+		read_only=True
+		)
+	zip_code_id = serializers.PrimaryKeyRelatedField(
 		many=True,
 		write_only=True,
 		queryset=ZipCode.objects.all(),
-		source='zip_code'
 	)
 
-	hospital_ownership_ids = serializers.PrimaryKeyRelatedField(
+	hospital_ownership = HospitalOwnershipSerializer(
+		many=False,
+		read_only=True
+		)
+	hospital_ownership_id = serializers.PrimaryKeyRelatedField(
 		many=True,
 		write_only=True,
 		queryset=HospitalOwnership.objects.all(),
-		source='hospital_ownership'
 	)
 
-	hospital_quality_score_ids = serializers.PrimaryKeyRelatedField(
+	hospital_quality_score = HospitalQualityScoreSerializer(
+		many=False,
+		read_only=True
+		)
+	hospital_quality_score_id = serializers.PrimaryKeyRelatedField(
 		many=True,
 		write_only=True,
 		queryset=HospitalQualityScore.objects.all(),
-		source='hospital_quality_score'
+	)
+
+	drg_codes = serializers.PrimaryKeyRelatedField(
+		many=True,
+		write_only=True,
+		queryset=Pricing.objects.all(),
 	)
 
 	class Meta:
@@ -138,15 +128,16 @@ class HospitalSerializer(serializers.ModelSerializer):
 			'hospital_name',
 			'address',
 			'city',
-			'city_ids',
+			'city_id',
 			'state',
-			'state_ids',
+			'state_id',
 			'zip_code',
-			'zip_code_ids',
+			'zip_code_id',
 			'hospital_ownership',
-			'hospital_ownership_ids',
+			'hospital_ownership_id',
 			'hospital_quality_score',
-			'hospital_quality_score_ids',
+			'hospital_quality_score_id',
+			'drg_codes'
 		)
 
 	def create(self, validated_data):
@@ -163,20 +154,19 @@ class HospitalSerializer(serializers.ModelSerializer):
 
 		# print(validated_data)
 
-		hospital_pricing_tbl = validated_data.pop('hospital_pricing')  #many to many table here
+		hospital_tbl = validated_data.pop('hospital')  #many to many table here
 		hospital = Hospital.objects.create(**validated_data)
 
-		if hospital_pricing_tbl is not None:
-			for hosp in hospital_pricing_tbl:
-				HospitalPricing.objects.create(
-					hospital_id=hospital.hospital_id,
-					price_id=pricing.price_id
+		if hospital_tbl is not None:
+			for hosp in hospital_tbl:
+				Hospital.objects.create(
+					hospital_id=hospital_id
 				)
 		return hospital
 
 	def update(self, instance, validated_data):
 		hospital_id = instance.hospital_id
-		new_hospitals = validated_data.pop('hospital_pricing') #many to many table
+		new_hospitals = validated_data.pop('hospital_name') #many to many table
 
 		instance.hospital_name = validated_data.get(
 			'hospital_name',
@@ -214,7 +204,7 @@ class HospitalSerializer(serializers.ModelSerializer):
 
 		# If any existing country/areas are not in updated list, delete them
 		new_ids = []
-		old_ids = HospitalPricing.objects \
+		old_ids = Hospital.objects \
 			.values_list('hospital_id', flat=True) \
 			.filter(hospital_id__exact=hospital_id)
 
@@ -227,7 +217,7 @@ class HospitalSerializer(serializers.ModelSerializer):
 			if new_id in old_ids:
 				continue
 			else:
-				HospitalPricing.objects \
+				Hospital.objects \
 					.create(hospital_id=hospital_id, pricing_id=new_id)
 
 		# Delete old unmatched country entries
@@ -235,8 +225,113 @@ class HospitalSerializer(serializers.ModelSerializer):
 			if old_id in new_ids:
 				continue
 			else:
-				HospitalPricing.objects \
+				Hospital.objects \
 					.filter(hospital_id=hospital_id, pricing_id=old_id) \
+					.delete()
+
+		return instance
+
+
+
+
+
+# make like heritagesitejuristdiction serializer 
+# look at serializers.listfield
+
+
+# https://www.django-rest-framework.org/api-guide/serializers/#listserializer
+# class PricingListSerializer(serializers.ListSerializer):
+# 	def create(self, validated_data):
+# 		price = [Pricing(**item) for item in validated_data]
+# 		return Pricing.objects.bulk_create(price)
+
+# class PricingSerializer(serializers.Serializer):
+# 	# prices_list = PricesSerializer(
+# 	# 	many=False,
+# 	# 	read_only=False
+# 	# 	)
+# 	# prices_id = serializers.PrimaryKeyRelatedField(
+# 	# 	many=True,
+# 	# 	write_only=True,
+# 	# 	)
+# 	# prices = serializers.DictField(
+# 	# 	child=serializers.CharField(allow_blank=False)
+# 	# 	)
+
+# 	class Meta:
+# 		list_serializer_class = PricingListSerializer
+# 		# model = Pricing
+# 		# fields = (
+# 		# 	prices
+# 		# 	)
+
+# 	def create():
+# 		prices = validated_data.pop('prices')
+# 		if prices is not None:
+# 			for price in prices:
+# 				Pricing.objects.create(hospital_id=price[0],drg_code=price[1],price=price[2])
+
+
+class PricingSerializer(serializers.Serializer):
+	hospital_id = serializers.CharField()
+	drg_code = serializers.CharField()
+	price = serializers.CharField()
+
+	class Meta:
+		model = Pricing
+		fields = (
+			'hospital_id',
+			'drg_code',
+			'price'
+			)
+
+	def create():
+		prices = validated_data.pop('prices')
+		if prices is not None:
+			for price in prices:
+				Pricing.objects.create(hospital_id=price[0],drg_code=price[1],price=price[2])
+
+
+
+
+
+# look at heritagesites update queryset that gets the existing pricing.objects.create.filter by hospital_id
+# open dictionary, dig out hospital_id, delete curret entries for hospital_id in pricing table and
+# replace it with the new info, api is a replacement api
+
+
+	def update():
+
+		prices = validated_data.pop('prices')
+		if prices is not None:
+			for price in prices:
+				Pricing.objects.create(hospital_id=price[0],drg_code=price[1],price=price[2])
+
+		# If any existing country/areas are not in updated list, delete them
+		new_ids = []
+		old_ids = Pricing.objects \
+			.values_list('pricing', flat=True) \
+			.filter(pricing_id__exact=pricing)
+
+		# TODO Insert may not be required (Just return instance)
+
+		# Insert new unmatched country entries
+		for price in new_prices:
+			new_id = pricing.price_id
+			new_ids.append(new_id)
+			if new_id in old_ids:
+				continue
+			else:
+				Pricing.objects \
+					.create(pricing_id=pricing, drg_code_id=new_id)
+
+		# Delete old unmatched country entries
+		for old_id in old_ids:
+			if old_id in new_ids:
+				continue
+			else:
+				Pricing.objects \
+					.filter(pricing_id=pricing, drg_code_id=old_id) \
 					.delete()
 
 		return instance

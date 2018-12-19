@@ -1,0 +1,48 @@
+{% extends 'hospital_pricing/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<article>
+	<header>
+	  <div class="row">
+	    <div class="col-sm-11">
+	      <h2>DRG Code Charge Amounts</h2>
+	    </div>
+	    <div class="col-sm-7">
+	    	&nbsp;<a class="btn btn-outline-primary" href="{% url 'pricing_filter' %}">New Search</a>
+      		Select one or more filters relevant to your search and then click "filter".
+    	</div>
+	    <div class="col-sm-1">
+	      	{% if user.is_authenticated %}
+	        <a class="btn btn-outline-secondary" href="{% url 'pricing_new' %}">Add New Charge</a>
+	      {% endif %}
+	    </div>
+	  </div>
+	</header>
+
+  <div class="row">
+    <div class="col-sm-3">
+      <div class="px-2 py-2" style="border:1px solid #8E8D8A;">
+        <form action="" method="get">
+          {{ filter.form|crispy }}
+          <!-- add a submit button -->
+          <button type="submit" class="btn btn-outline-primary" >Filter</button>
+    		&nbsp;<button type="reset" value="reset" class="btn btn-outline-secondary">Clear</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-sm-6">
+
+      {% for charge in object_list %}
+        <h4> <a href="{% url 'hospital_detail' hospital.pk %}">{{ pricing.charge.charge | safe }}</a> </h4>
+
+        <!-- add the country_area_names and description template tags -->
+        {{ pricing.drg_code.drg_code | safe }}
+        {{ pricing.pricing_id | safe }}
+
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

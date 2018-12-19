@@ -8,21 +8,21 @@
 from django.db import models
 from django.urls import reverse
 
-class ChargeAmount(models.Model):
-    charge_id = models.AutoField(primary_key=True)
-    charge = models.DecimalField(unique=True, max_digits=10, decimal_places=2)
+# class ChargeAmount(models.Model):
+#     charge_id = models.AutoField(primary_key=True)
+#     charge = models.DecimalField(unique=True, max_digits=10, decimal_places=2)
 
-    class Meta:
-        managed = False
-        db_table = 'charge_amount'
-        ordering = ['charge_id']
-        verbose_name = 'Average Amount Charged'
-        verbose_name_plural = 'Average Amount Charged'
+#     class Meta:
+#         managed = False
+#         db_table = 'charge_amount'
+#         ordering = ['charge_id']
+#         verbose_name = 'Average Amount Charged'
+#         verbose_name_plural = 'Average Amount Charged'
 
 
 
-    def __str__(self):
-        return self.charge
+#     def __str__(self):
+#         return self.charge
 
 
 class City(models.Model):
@@ -64,7 +64,7 @@ class Hospital(models.Model):
     hospital_ownership = models.ForeignKey('HospitalOwnership', models.DO_NOTHING, blank=True, null=True)
     hospital_quality_score = models.ForeignKey('HospitalQualityScore', models.DO_NOTHING, blank=True, null=True)
     # intermediate model (hospital -> hospital_pricing -> pricing)
-    pricing = models.ManyToManyField('Pricing', through='HospitalPricing')
+    drg_codes = models.ManyToManyField('DRGCode', through='Pricing')
 
     class Meta:
         managed = False
@@ -79,33 +79,22 @@ class Hospital(models.Model):
     def get_absolute_url(self):
         return reverse('hospital_detail', kwargs={'pk': self.pk})
 
-    def pricing_display(self):
-        return ', '.join(pricing.charge for hospital in self.hospital.all()[:25])
+    # def pricing_display(self):
+    #     return ', '.join(pricing.price for hospital in self.hospital.all()[:25])
 
-    pricing_display.short_description = 'Average Amount Charged'
+    # pricing_display.short_description = 'Average Amount Charged'
 
-# ask what I would use as a property here
     # @property
-    # def pricing(self):
-    #     price = self.pricing.select_related('charge').order_by('hospital')
-
-    #     names = []
-    #     for charge in charges:
-    #         name = charges
-    #         if name is None:
-    #             continue
-    #         # quality_score = hospital.drg_code
-
-    #     return ', '.join(names)
-    # @property
-    # def drg_codes(self):
-    #     codes = self.pricing.select_related('hospital_pricing').order_by('hospital_pricing__pricing__drg_code__drg_definition')
+    # def drg_code_list(self):
+    #     codes = self.drg_codes
     #     names = []
     #     for drg_code in codes:
-    #         drg_code = hospital.hospital_pricing.pricing.drg_code
-    #         if drg_code is None:
-    #             continue
+    #         # drg_code = drg_code.drg_code_id
+    #         # if drg_code is None:
+    #         #     continue
     #         name = drg_code.drg_definition
+    #         if name is None:
+    #             continue
     #         if name not in names:
     #             names.append(name)
     #     return ', '.join(names)
@@ -146,23 +135,23 @@ class HospitalQualityScore(models.Model):
 
 
 class Pricing(models.Model):
-    price_id = models.AutoField(primary_key=True)
-    pricing_provider_identifier = models.CharField(unique=True, max_length=6)
-    charge = models.ForeignKey('ChargeAmount', models.DO_NOTHING, blank=True, null=True)
-    drg_code = models.ForeignKey('DRGCode', models.DO_NOTHING)
-    zip_code = models.ForeignKey('ZipCode', models.DO_NOTHING)
-
+    pricing_id = models.AutoField(primary_key=True)
+    hospital = models.ForeignKey('Hospital', on_delete=models.CASCADE)
+    price = models.DecimalField(unique=True, max_digits=10, decimal_places=2)
+    drg_code = models.ForeignKey('DRGCode', on_delete=models.CASCADE)
+    
     class Meta:
         managed = False
         db_table = 'pricing'
-        ordering = ['pricing_provider_identifier']
+        ordering = ['pricing_id']
         verbose_name = 'Pricing'
     def __str__(self):
-        charge = str(self.charge.charge)
-        return charge
+        price = str(self.price)
+        return price
 
 class DRGCode(models.Model):
     drg_code_id = models.AutoField(primary_key=True)
+    drg_code = models.CharField(max_length = 255)
     drg_definition = models.CharField(max_length = 200)
 
     class Meta:
@@ -173,7 +162,7 @@ class DRGCode(models.Model):
         verbose_name_plural = 'DRG Codes'
 
     def __str__(self):
-        return self.drg_definition
+        return ''.join([self.drg_code, self.drg_definition]) 
 
 
 class State(models.Model):
@@ -190,14 +179,3 @@ class State(models.Model):
     def __str__(self):
         return self.state
 
-
-class HospitalPricing(models.Model):
-    hospital_pricing_id = models.AutoField(primary_key=True)
-    hospital = models.ForeignKey('Hospital', models.DO_NOTHING)
-    price = models.ForeignKey('Pricing', models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'hospital_pricing'
-        ordering = ['hospital','price']
-        verbose_name = 'Hospital Pricing'

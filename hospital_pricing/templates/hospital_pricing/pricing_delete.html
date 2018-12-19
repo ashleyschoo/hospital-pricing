@@ -1,0 +1,14 @@
+{% extends 'hospital_pricing/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+  <form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete the charge amount "{{ pricing.charge.charge }}"?</p>
+    <button type="submit" class="btn btn-outline-danger">Delete</button>
+    <a class="btn btn-outline-secondary" href="{% url 'home' %}">Cancel</a>
+  </form>
+
+{% endblock content %}

@@ -1,6 +1,6 @@
 import django_filters
-from hospital_pricing.models import Hospital, Pricing, HospitalPricing, \
-	HospitalQualityScore, HospitalOwnership, City, State, ZipCode, ChargeAmount, DRGCode
+from hospital_pricing.models import Hospital, Pricing, \
+	HospitalQualityScore, HospitalOwnership, City, State, ZipCode, DRGCode
 
 
 class HospitalFilterView(django_filters.FilterSet):
@@ -23,7 +23,7 @@ class HospitalFilterView(django_filters.FilterSet):
 		lookup_expr='icontains'
 		)
 
-	state = django_filters.ModelMultipleChoiceFilter(
+	state = django_filters.ModelChoiceFilter(
 		queryset=State.objects.all().order_by("state"),
 		field_name = 'state',
 		label = 'State',
@@ -39,7 +39,7 @@ class HospitalFilterView(django_filters.FilterSet):
 		)
 		
 
-	hospital_quality_score = django_filters.ModelMultipleChoiceFilter(
+	hospital_quality_score = django_filters.ModelChoiceFilter(
 		queryset=HospitalQualityScore.objects.all().order_by("hospital_quality_score"),
 		field_name='hospital_quality_score',
 		label='Hospital Quality Score',

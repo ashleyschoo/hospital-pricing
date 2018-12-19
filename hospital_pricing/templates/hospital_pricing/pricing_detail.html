@@ -1,0 +1,39 @@
+{% extends 'hospital_pricing/base.html' %}
+{% load hospital_pricing_extras %}
+
+   
+   <!-- safe filter on for raw HTML stored in database -->
+{% block content %}
+     <header>
+       <div class="row">
+         <div class="col-sm-10">
+           <h2>{{ pricing.charge_amount.charge | safe }}</h2>
+         </div>
+         <div class="col-xs-1">
+           {% if user.is_authenticated %}
+             <a class="btn btn-outline-secondary" href="{% url 'pricing_update' pricing.pk %}">Edit</a>
+           {% endif %}
+         </div>
+         <div class="col-xs-1">
+           {% if user.is_authenticated %}
+             &nbsp;<a class="btn btn-outline-warning" href="{% url 'pricing_delete' pricing.pk %}">Delete</a>
+           {% endif %}
+         </div>
+       </div>
+     </header>
+
+{% if pricing.charge_amount.charge %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p> Average Amount Charged </p>
+      </div>
+      <div class="col-sm-10">
+        {% for pricing in charge_amount.charge.all %}
+        <p>{{pricing.drg_code.drg_code}},{{pricing.drg_code.drg_definition}}, ${{ pricing.charge.charge}}</p>
+        {% endfor %}
+      </div>
+    </div> 
+  {% endif %}
+
+
+{% endblock %}

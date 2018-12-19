@@ -12,7 +12,7 @@ class Hospital(admin.ModelAdmin):
 				'hospital_name',
 				'hospital_provider_identifier',
 				'hospital_ownership',
-				'hospital_quality_score'				
+				'hospital_quality_score',	
 				)
 				}),
 			('Location', {
@@ -30,7 +30,7 @@ class Hospital(admin.ModelAdmin):
 		'hospital_provider_identifier',
 		'city',
 		'state',
-		'pricing_display'
+		# 'pricing_display',
 		)
 
 	list_filter = (
@@ -42,21 +42,11 @@ class Hospital(admin.ModelAdmin):
 # admin.site.pricing
 @admin.register(models.Pricing)
 class PricingAdmin(admin.ModelAdmin):
-	fields = ['drg_code', 
-	'charge', 'pricing_provider_identifier', 'zip_code']
+	fields = ['hospital_id','drg_code','price']
+	list_display = ['hospital_id','drg_code','price']
+	list_filter = ['hospital_id','drg_code','price']
 
-	list_display = ['drg_code', 
-	'charge', 'pricing_provider_identifier', 'zip_code']
 
-	list_filter = ['drg_code', 
-	'charge', 'pricing_provider_identifier', 'zip_code']
-
-# admin.site.chargeamount
-@admin.register(models.ChargeAmount)
-class ChargeAmountAdmin(admin.ModelAdmin):
-	fields = ['charge']
-	list_display = ['charge']
-	ordering = ['charge']
 
 #  admin.site.state
 @admin.register(models.State)

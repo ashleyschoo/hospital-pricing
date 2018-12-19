@@ -9,7 +9,7 @@
 --
 SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS city, state, zip_code, hospital, temp_hospital, hospital_ownership, hospital_quality_score,
- hospital_pricing, temp_pricing, charge_amount, pricing, drg_code;
+temp_pricing, pricing, drg_code;
 SET FOREIGN_KEY_CHECKS=1;
 
 --
@@ -39,17 +39,17 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hospital_info_trimmed.csv' 
-INTO TABLE temp_hospital
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (hospital_provider_identifier, hospital_name,
-  address, city_name, state, zip_code, @dummy, hospital_ownership,
-  hospital_quality_score, @dummy, @dummy, @dummy, @dummy
-  );
+-- LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hospital_info_trimmed.csv' 
+-- INTO TABLE temp_hospital
+--   CHARACTER SET utf8mb4
+--   FIELDS TERMINATED BY ','
+--   ENCLOSED BY '"'
+--   LINES TERMINATED BY '\n'
+--   IGNORE 1 LINES
+--   (hospital_provider_identifier, hospital_name,
+--   address, city_name, state, zip_code, @dummy, hospital_ownership,
+--   hospital_quality_score, @dummy, @dummy, @dummy, @dummy
+--   );
 
 -- 2.2 city table
 
@@ -62,14 +62,14 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hosp_city.csv'
-INTO TABLE city
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (city_name);
+-- LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hosp_city.csv'
+-- INTO TABLE city
+--   CHARACTER SET utf8mb4
+--   FIELDS TERMINATED BY ','
+--   ENCLOSED BY '"'
+--   LINES TERMINATED BY '\n'
+--   IGNORE 1 LINES
+--   (city_name);
 
 -- 2.3 state table
 
@@ -82,14 +82,14 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hosp_state.csv'
-INTO TABLE state
-  CHARACTER SET utf8mb4
-    FIELDS TERMINATED BY ','
-    ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (state);
+-- LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hosp_state.csv'
+-- INTO TABLE state
+--   CHARACTER SET utf8mb4
+--     FIELDS TERMINATED BY ','
+--     ENCLOSED BY '"'
+--     LINES TERMINATED BY '\n'
+--     IGNORE 1 LINES
+--     (state);
 
 
 -- 2.4 zip_code table
@@ -102,14 +102,14 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hosp_zip.csv'
-INTO TABLE zip_code
-  CHARACTER SET utf8mb4
-    FIELDS TERMINATED BY ','
-    ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-    (zip_code);
+-- LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/hosp_zip.csv'
+-- INTO TABLE zip_code
+--   CHARACTER SET utf8mb4
+--     FIELDS TERMINATED BY ','
+--     ENCLOSED BY '"'
+--     LINES TERMINATED BY '\n'
+--     IGNORE 1 LINES
+--     (zip_code);
 
 -- 2.5 hospital_ownership table
 
@@ -122,20 +122,17 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
--- Load data from external file. Check for blank entries and set to NULL.
--- INSERT IGNORE INTO zip_code_designation (zip_code_designation) VALUES
-
-INSERT IGNORE INTO  hospital_ownership (hospital_ownership_description) VALUES
-("Government - Federal"),
-("Government - Hospital District or Authority"),
-("Government - Local"),
-("Government - State"),
-("Physician"),
-("Proprietary"),
-("Tribal"),
-("Voluntary non-profit - Church"),
-("Voluntary non-profit - Other"),
-("Voluntary non-profit - Private");
+-- INSERT IGNORE INTO  hospital_ownership (hospital_ownership_description) VALUES
+-- ("Government - Federal"),
+-- ("Government - Hospital District or Authority"),
+-- ("Government - Local"),
+-- ("Government - State"),
+-- ("Physician"),
+-- ("Proprietary"),
+-- ("Tribal"),
+-- ("Voluntary non-profit - Church"),
+-- ("Voluntary non-profit - Other"),
+-- ("Voluntary non-profit - Private");
 
 
 -- 2.5 hospital_quality_score table
@@ -149,14 +146,14 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
     
-INSERT INTO hospital_quality_score (hospital_quality_score) VALUES
-  ('0'),
-  ('1'),
-  ('2'),
-  ('3'),
-  ('4'),
-  ('5'),
-  ('NOT AVAILABLE');
+-- INSERT INTO hospital_quality_score (hospital_quality_score) VALUES
+--   ('0'),
+--   ('1'),
+--   ('2'),
+--   ('3'),
+--   ('4'),
+--   ('5'),
+--   ('NOT AVAILABLE');
 
 -- 2.6 hospital table
  
@@ -181,30 +178,30 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO hospital (
-      hospital_provider_identifier,
-      hospital_name,
-      address,
-      city_id,
-      state_id,
-      zip_code_id,
-      hospital_ownership_id,
-      hospital_quality_score_id
-)
-SELECT th.hospital_provider_identifier, th.hospital_name, th.address, cit.city_id, s.state_id, z.zip_code_id, 
-        ho.hospital_ownership_id, hq.hospital_quality_score_id
-  FROM temp_hospital th
-        LEFT JOIN city cit
-              ON TRIM(th.city_name) = TRIM(cit.city_name)
-        LEFT JOIN state s
-              ON TRIM(th.state) = TRIM(s.state)
-        LEFT JOIN hospital_ownership ho
-              ON TRIM(th.hospital_ownership) = TRIM(ho.hospital_ownership_description)
-        LEFT JOIN hospital_quality_score hq
-              ON TRIM(th.hospital_quality_score) = TRIM(hq.hospital_quality_score)
-        LEFT JOIN zip_code z
-              ON TRIM(z.zip_code) = TRIM(th.zip_code)
-ORDER BY th.hospital_provider_identifier;
+-- INSERT IGNORE INTO hospital (
+--       hospital_provider_identifier,
+--       hospital_name,
+--       address,
+--       city_id,
+--       state_id,
+--       zip_code_id,
+--       hospital_ownership_id,
+--       hospital_quality_score_id
+-- )
+-- SELECT th.hospital_provider_identifier, th.hospital_name, th.address, cit.city_id, s.state_id, z.zip_code_id, 
+--         ho.hospital_ownership_id, hq.hospital_quality_score_id
+--   FROM temp_hospital th
+--         LEFT JOIN city cit
+--               ON TRIM(th.city_name) = TRIM(cit.city_name)
+--         LEFT JOIN state s
+--               ON TRIM(th.state) = TRIM(s.state)
+--         LEFT JOIN hospital_ownership ho
+--               ON TRIM(th.hospital_ownership) = TRIM(ho.hospital_ownership_description)
+--         LEFT JOIN hospital_quality_score hq
+--               ON TRIM(th.hospital_quality_score) = TRIM(hq.hospital_quality_score)
+--         LEFT JOIN zip_code z
+--               ON TRIM(z.zip_code) = TRIM(th.zip_code)
+-- ORDER BY th.hospital_provider_identifier;
 
 
 
@@ -229,111 +226,115 @@ ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/pricing_trimmed.csv' 
-INTO TABLE temp_pricing
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (drg_definition, pricing_provider_identifier, @dummy, @dummy, @dummy, @dummy, zip_code, 
-  @dummy, @dummy, price, @dummy, @dummy
-  );
+-- LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/pricing_trimmed.csv' 
+-- INTO TABLE temp_pricing
+--   CHARACTER SET utf8mb4
+--   FIELDS TERMINATED BY ','
+--   ENCLOSED BY '"'
+--   LINES TERMINATED BY '\n'
+--   IGNORE 1 LINES
+--   (drg_definition, pricing_provider_identifier, @dummy, @dummy, @dummy, @dummy, zip_code, 
+--   @dummy, @dummy, price, @dummy, @dummy
+--   );
 
 
 -- 3.2 charge_amount  this table is similar to the city table that has 1 entity that comes from its own csv
 
-CREATE TABLE IF NOT EXISTS charge_amount (
-  charge_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  charge DECIMAL(10,2) NOT NULL UNIQUE,
-  PRIMARY KEY (charge_id)
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
+-- CREATE TABLE IF NOT EXISTS charge_amount (
+--   charge_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+--   charge DECIMAL(10,2) NOT NULL UNIQUE,
+--   PRIMARY KEY (charge_id)
+-- )
+-- ENGINE=InnoDB
+-- CHARACTER SET utf8mb4
+-- COLLATE utf8mb4_0900_ai_ci;
 
-LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/price.csv'
-INTO TABLE charge_amount
-  CHARACTER SET utf8mb4
-  FIELDS TERMINATED BY ','
-  ENCLOSED BY '"'
-  LINES TERMINATED BY '\n'
-  IGNORE 1 LINES
-  (charge);
+-- LOAD DATA LOCAL INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/output/price.csv'
+-- INTO TABLE charge_amount
+--   CHARACTER SET utf8mb4
+--   FIELDS TERMINATED BY ','
+--   ENCLOSED BY '"'
+--   LINES TERMINATED BY '\n'
+--   IGNORE 1 LINES
+--   (charge);
 
 -- 3.3 drg table
+-- this table is created here for string joining with the original CSV string found in the temp_pricing table
+-- this table is recreated at the end to enforce single values per column
 CREATE TABLE IF NOT EXISTS drg_code (
   drg_code_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  drg_definition CHAR(200) NOT NULL UNIQUE,
+  drg_code CHAR(3),
+  drg_definition CHAR(200),
   PRIMARY KEY (drg_code_id)
 )
 ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-INSERT INTO drg_code (drg_definition) VALUES
-  ('101 - SEIZURES W/O MCC'),
-  ('203 - BRONCHITIS & ASTHMA W/O CC/MCC'),
-  ('313 - CHEST PAIN');
 
+INSERT INTO drg_code (drg_code, drg_definition) VALUES
+  ('101','101 - SEIZURES W/O MCC'),
+  ('203', '203 - BRONCHITIS & ASTHMA W/O CC/MCC'),
+  ('313', '313 - CHEST PAIN');
 
 
 -- 3.4 pricing table 
 
 CREATE TABLE IF NOT EXISTS pricing (
-  price_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
-  pricing_provider_identifier CHAR(6) NOT NULL,
-  charge_id INTEGER(10) NOT NULL,
-  drg_code_id INTEGER(3) NOT NULL,
-  zip_code_id INTEGER(10),
-  PRIMARY KEY (price_id),
-  FOREIGN KEY (charge_id) REFERENCES charge_amount(charge_id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (zip_code_id) REFERENCES zip_code(zip_code_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  pricing_id INTEGER NOT NULL AUTO_INCREMENT UNIQUE,
+  hospital_id INTEGER,
+  price DECIMAL(10,2),
+  drg_code_id INTEGER(3),
+  PRIMARY KEY (pricing_id),
+  FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (drg_code_id) REFERENCES drg_code(drg_code_id) ON DELETE CASCADE ON UPDATE CASCADE
 )
 ENGINE=InnoDB
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO pricing (
-      pricing_provider_identifier,
-      charge_id, drg_code_id,
-      zip_code_id
-)
-SELECT tp.pricing_provider_identifier,
-       ch.charge_id, drg.drg_code_id, zp.zip_code_id
-  FROM temp_pricing tp
-       LEFT JOIN charge_amount ch
-              ON TRIM(tp.price) = TRIM(ch.charge)
-        LEFT JOIN drg_code drg
-              ON TRIM(drg.drg_definition) = TRIM(tp.drg_definition)
-        LEFT JOIN zip_code zp
-              ON TRIM(zp.zip_code) = TRIM(tp.zip_code)
-  WHERE tp.drg_definition  IN ('101 - SEIZURES W/O MCC','203 - BRONCHITIS & ASTHMA W/O CC/MCC','313 - CHEST PAIN') 
-ORDER BY tp.pricing_provider_identifier;
+-- INSERT IGNORE INTO pricing (
+--       hospital_id, price, drg_code_id
+-- )
+-- SELECT  h.hospital_id, tp.price, drg.drg_code_id
+--   FROM temp_pricing tp
+--         LEFT JOIN drg_code drg
+--               ON TRIM(drg.drg_definition) = TRIM(tp.drg_definition)
+--         LEFT JOIN hospital h
+--               ON h.hospital_provider_identifier = tp.pricing_provider_identifier
+--   WHERE tp.drg_definition  IN ('101 - SEIZURES W/O MCC','203 - BRONCHITIS & ASTHMA W/O CC/MCC','313 - CHEST PAIN') 
+-- ORDER BY tp.pricing_provider_identifier;
 
 
-CREATE TABLE IF NOT EXISTS hospital_pricing (
-  hospital_pricing_id INTEGER AUTO_INCREMENT NOT NULL UNIQUE,
-  hospital_id INTEGER NOT NULL,
-  price_id INTEGER NOT NULL,
-  PRIMARY KEY (hospital_pricing_id),
-  FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
-  ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (price_id) REFERENCES pricing(price_id)
-  ON DELETE CASCADE ON UPDATE CASCADE
-)
-ENGINE=InnoDB
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
+-- CREATE TABLE IF NOT EXISTS hospital_pricing (
+--   hospital_pricing_id INTEGER AUTO_INCREMENT NOT NULL UNIQUE,
+--   hospital_id INTEGER NOT NULL,
+--   price_id INTEGER NOT NULL,
+--   PRIMARY KEY (hospital_pricing_id),
+--   FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
+--   ON DELETE CASCADE ON UPDATE CASCADE,
+--   FOREIGN KEY (price_id) REFERENCES pricing(price_id)
+--   ON DELETE CASCADE ON UPDATE CASCADE
+-- )
+-- ENGINE=InnoDB
+-- CHARACTER SET utf8mb4
+-- COLLATE utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO hospital_pricing (hospital_id, price_id)
-SELECT h.hospital_id, p.price_id
-  FROM hospital h 
-      LEFT JOIN pricing p
-      ON h.hospital_provider_identifier = p.pricing_provider_identifier
-  ORDER BY h.hospital_provider_identifier;
+-- INSERT IGNORE INTO hospital_pricing (hospital_id, price_id)
+-- SELECT h.hospital_id, p.price_id
+--   FROM hospital h 
+
+--   ORDER BY h.hospital_provider_identifier;
 
 
 -- DROP TABLE temp_hospital;
 -- DROP TABLE temp_pricing;
+
+UPDATE drg_code SET drg_code = '101', drg_definition = 'SEIZURES W/O MCC'
+WHERE drg_code_id = 1;
+
+UPDATE drg_code SET drg_code = '203', drg_definition = 'BRONCHITIS & ASTHMA W/O CC/MCC'
+WHERE drg_code_id = 2;
+
+UPDATE drg_code SET drg_code = '313', drg_definition = 'CHEST PAIN'
+WHERE drg_code_id = 3;

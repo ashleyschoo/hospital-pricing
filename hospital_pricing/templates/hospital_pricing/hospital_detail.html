@@ -22,14 +22,14 @@
        </div>
      </header>
 
-{% if hospital.pricing %}
+{% if hospital.drg_codes.all %}
     <div class="row">
       <div class="col-sm-2">
         <p> Average Amount Charged </p>
       </div>
       <div class="col-sm-10">
-        {% for pricing in hospital.pricing.all %}
-        <p>{{pricing.drg_code.drg_definition}}, ${{ pricing.charge.charge}}</p>
+        {% for code in hospital.drg_codes.all %}
+        <p>{{code.drg_code}}: {{code.drg_definition}} </p>
         {% endfor %}
       </div>
     </div> 
@@ -104,16 +104,7 @@
        </div>
      {% endif %}
    
-     {% if hospital.drg_codes %}
-       <div class="row">
-         <div class="col-sm-2">
-           <p>drg_codes</p>
-         </div>
-         <div class="col-sm-10">
-           {{ hospital.drg_codes | safe }}
-         </div>
-       </div>
-     {% endif %}
+
   
 
 
