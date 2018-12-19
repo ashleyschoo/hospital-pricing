@@ -35,8 +35,8 @@
     </div>
     <div class="col-sm-6">
 
-      {% for price in object_list %}
-        <h4> <a href="{% url 'pricing_detail' pricing.pk %}">{{ pricing.drg_code | safe }}</a> </h4>
+      {% for pricing in object_list %}
+        <h4> <a href="{% url 'pricing_detail' pricing.pk %}">{{ pricing.price | safe }}</a> </h4>
         {{ pricing.drg_code | safe }}
         {{ pricing.hospital_id | safe }}
         {{ pricing.price | safe }}

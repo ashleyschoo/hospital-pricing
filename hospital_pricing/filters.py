@@ -6,7 +6,12 @@ class PricingFilterView(django_filters.FilterSet):
 	hospital_id = django_filters.CharFilter(
 		field_name='hospital__hospital_id',
 		label='Hospital ID',
-		lookup_expr='icontains'
+		lookup_expr='exact'
+		)
+	pricing_id = django_filters.CharFilter(
+		field_name='pricing_id',
+		label='Pricing ID',
+		lookup_expr='exact'
 		)
 	drg_code = django_filters.ModelChoiceFilter(
 		queryset=DRGCode.objects.all(),

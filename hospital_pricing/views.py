@@ -250,7 +250,7 @@ class PricingUpdateView(generic.UpdateView):
 			.filter(pricing_id=pricing_id)
 
 		# New hospital list
-		new_hospital = form.cleaned_data['pricing']
+		new_hospital = form.cleaned_data['pricing_id']
 
 		# TODO can these loops be refactored?
 

@@ -12,20 +12,41 @@
   <!-- novalidate attribute required to render validation messages -->
   <form method="post" novalidate>
     {% csrf_token %}
-
-    {{form | crispy }}
 <!-- 
-    <div class="row">
-      <div class="col-6">
-        {{ form.address|as_crispy_field }}
-      </div>
-    </div>
+    {{ form.field|as_crispy_field }} -->
 
+
+    
+    {{form | crispy }}
+ <!-- {% if price.price %}
     <div class="row">
       <div class="col-6">
-        {{ form.city|as_crispy_field }}
+        {{ form.drg_code|as_crispy_field }}
       </div>
     </div>
+  {% endif %}
+
+
+ {% if price.price %}
+    <div class="row">
+      <div class="col-6">
+        {{ form.pricing_id|as_crispy_field }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if price %}
+    <div class="row">
+       <div class="col-6">
+        {{ form.price|as_crispy_field }}
+      </div>
+    </div>
+  {% endif %}
+ -->
+
+<!-- 
+
+
 
     <div class="row">
       <div class="col-6">
@@ -57,7 +78,7 @@
 
   <button type="submit" class="btn btn-outline-success">Update</button>
   <!-- Restore missing button -->  
-    &nbsp;<a class="btn btn-outline-secondary" href="{% url 'pricing_detail' pricing.pk %}">Cancel</a>
+    &nbsp;<a class="btn btn-outline-secondary" href="{% url 'pricing_detail' price.pk %}">Cancel</a>
 
 </form>
 

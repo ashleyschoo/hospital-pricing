@@ -11,29 +11,63 @@
          </div>
          <div class="col-xs-1">
            {% if user.is_authenticated %}
-             <a class="btn btn-outline-secondary" href="{% url 'pricing_update' pricing.pk %}">Edit</a>
+             <a class="btn btn-outline-secondary" href="{% url 'pricing_update' price.pk %}">Edit</a>
            {% endif %}
          </div>
          <div class="col-xs-1">
            {% if user.is_authenticated %}
-             &nbsp;<a class="btn btn-outline-warning" href="{% url 'pricing_delete' pricing.pk %}">Delete</a>
+             &nbsp;<a class="btn btn-outline-warning" href="{% url 'pricing_delete' price.pk %}">Delete</a>
            {% endif %}
          </div>
        </div>
      </header>
 
-{% if pricing.pricing_id %}
+{% if price.price %}
     <div class="row">
       <div class="col-sm-2">
-        <p> Average Amount Charged </p>
-      </div>
-      <div class="col-sm-10">
-        {% for code in pricing.drg_code.all %}
-        <p>{{code.drg_code}},{{code.drg_definition}}, ${{ pricing.price}}</p>
-        {% endfor %}
-      </div>
+        <p> Hospital ID </p>
+      </div>        
+        <div class="col-sm-10">
+          <p>{{price.hospital_id}}</p>
+        </div>
+    </div> 
+  {% endif %}
+
+{% if price.price %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p> DRG Code </p>
+      </div>        
+        <div class="col-sm-10">
+          <p>{{price.drg_code}}</p>
+        </div>
     </div> 
   {% endif %}
 
 
+{% if price.price %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p> Pricing ID </p>
+      </div>        
+        <div class="col-sm-10">
+          <p>{{price.pricing_id}}</p>
+        </div>
+    </div> 
+  {% endif %}
+
+{% if price %}
+    <div class="row">
+      <div class="col-sm-2">
+        <p>Price</p>
+      </div>
+      <div class="col-sm-10">
+        <p>${{ price }}</p>
+      </div>
+    </div>
+  {% endif %}
+
 {% endblock %}
+
+<!--         {% for code in price %} -->
+<!--         {% endfor %} -->
