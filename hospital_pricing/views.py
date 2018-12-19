@@ -18,7 +18,7 @@ from .models import Hospital
 from .models import DRGCode
 from .models import Pricing
 from .forms import HospitalPricingForm, PricingForm
-from .filters import HospitalFilterView
+from .filters import HospitalFilterView, PricingFilterView
 
 
 
@@ -55,6 +55,14 @@ class HospitalFilterView(PaginatedFilterView, FilterView):
 	template_name = 'hospital_pricing/hospital_filter.html'
 	context_object_name = 'hospitals'
 	paginate_by = 30
+
+
+class PricingFilterView(FilterView):
+	model = Pricing
+	filterset_class = PricingFilterView
+	template_name = 'hospital_pricing/pricing_filter.html'
+	context_object_name = 'price'
+
 
 @method_decorator(login_required, name='dispatch')
 class HospitalListView(generic.ListView): 

@@ -7,7 +7,7 @@
      <header>
        <div class="row">
          <div class="col-sm-10">
-           <h2>{{ pricing.charge_amount.charge | safe }}</h2>
+           <h2>{{ pricing.pricing_id | safe }}</h2>
          </div>
          <div class="col-xs-1">
            {% if user.is_authenticated %}
@@ -22,14 +22,14 @@
        </div>
      </header>
 
-{% if pricing.charge_amount.charge %}
+{% if pricing.pricing_id %}
     <div class="row">
       <div class="col-sm-2">
         <p> Average Amount Charged </p>
       </div>
       <div class="col-sm-10">
-        {% for pricing in charge_amount.charge.all %}
-        <p>{{pricing.drg_code.drg_code}},{{pricing.drg_code.drg_definition}}, ${{ pricing.charge.charge}}</p>
+        {% for code in pricing.drg_code.all %}
+        <p>{{code.drg_code}},{{code.drg_definition}}, ${{ pricing.price}}</p>
         {% endfor %}
       </div>
     </div> 

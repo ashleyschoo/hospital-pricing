@@ -8,7 +8,7 @@
 	<header>
 	  <div class="row">
 	    <div class="col-sm-11">
-	      <h2>U.S. Hospitals</h2>
+	      <h2>U.S. Pricing</h2>
 	    </div>
 	    <div class="col-sm-1">
 	      {% if user.is_authenticated %}
@@ -21,12 +21,12 @@
 <!-- 
 	  {% include 'hospital_pricing\pagination.html' %} -->
 
-	  {% if charge %}
+	  {% if price %}
 	  <ul>
-	    {% for charge in pricing %}
+	    {% for pricing_id in price %}
 
 	    <!-- safe filter on for raw HTML stored in database -->
-	    <li><a href="{% url 'pricing_detail' pricing.pk %}">{{ pricing.charge | safe }}</a></li>
+	    <li><a href="{% url 'pricing_detail' price.pk %}">{{ price | safe }}</a></li>
 	    {% endfor %}
 
 	  </ul>

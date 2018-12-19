@@ -2,6 +2,23 @@ import django_filters
 from hospital_pricing.models import Hospital, Pricing, \
 	HospitalQualityScore, HospitalOwnership, City, State, ZipCode, DRGCode
 
+class PricingFilterView(django_filters.FilterSet):
+	hospital_id = django_filters.CharFilter(
+		field_name='hospital__hospital_id',
+		label='Hospital ID',
+		lookup_expr='icontains'
+		)
+	drg_code = django_filters.ModelChoiceFilter(
+		queryset=DRGCode.objects.all(),
+		field_name='drg_code_id',
+		label='DRG Code',
+		)
+	class Meta:
+		model = Pricing
+		# form = SearchForm
+		# fields [] is required, even if empty.
+		fields = []
+
 
 class HospitalFilterView(django_filters.FilterSet):
 	hospital_name = django_filters.CharFilter(
