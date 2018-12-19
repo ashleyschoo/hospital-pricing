@@ -250,31 +250,31 @@ class PricingUpdateView(generic.UpdateView):
 			.filter(pricing_id=pricing_id)
 
 		# New hospital list
-		new_hospital = form.cleaned_data['pricing_id']
+		new_price = form.cleaned_data['pricing_id']
 
 		# TODO can these loops be refactored?
 
 		# New ids
 		new_ids = []
 
-		# # Insert new unmatched country entries
-		# for hospital in new_hospital:
-		# 	new_id = hospital.hospital_id
-		# 	new_ids.append(new_id)
-		# 	if new_id in old_ids:
-		# 		continue
-		# 	else:
-		# 		HospitalPricing.objects \
-		# 			.create(hospital=hospital_id, pricing=pricing.charge_id)
+		# Insert new unmatched country entries
+		for price in new_price:
+			new_id = price.pricing_id
+			new_ids.append(new_id)
+			if new_id in old_ids:
+				continue
+			else:
+				Pricing.objects \
+					.create(drg_code=drg_code_id, hospital=hospital.hospital_id)
 
-		# # Delete old unmatched country entries
-		# for old_id in old_ids:
-		# 	if old_id in new_ids:
-		# 		continue
-		# 	else:
-		# 		HospitalPricing.objects \
-		# 			.filter(hospital_id=hospital.hospital_id, pricing_id=old_id) \
-		# 			.delete()
+		# Delete old unmatched country entries
+		for old_id in old_ids:
+			if old_id in new_ids:
+				continue
+			else:
+				Pricing.objects \
+					.filter(hospital_id=hospital.hospital_id, pricing_id=old_id) \
+					.delete()
 
 		return HttpResponseRedirect(pricing.get_absolute_url())
 		# return redirect('hospital/hospital_detail', pk=site.pk)

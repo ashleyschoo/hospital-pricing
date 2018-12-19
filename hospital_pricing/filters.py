@@ -22,7 +22,7 @@ class PricingFilterView(django_filters.FilterSet):
 		model = Pricing
 		# form = SearchForm
 		# fields [] is required, even if empty.
-		fields = []
+		fields = ['hospital_id','pricing_id','drg_code']
 
 
 class HospitalFilterView(django_filters.FilterSet):
