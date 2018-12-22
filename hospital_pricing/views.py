@@ -75,9 +75,13 @@ class HospitalListView(generic.ListView):
 		return super().dispatch(*args, **kwargs)
 
 	def get_queryset(self):
-		return Hospital.objects\
-				.select_related('hospital_ownership', 'hospital_quality_score')\
-				.order_by('hospital_name')
+		return Hospital.objects.select_related(
+			'city',
+			'state',
+			'hospital_ownership',
+			'hospital_quality_score',
+			'zip_code'
+		).order_by('hospital_name')
 
 class PricingListView(generic.ListView): 
 	model = Pricing
@@ -152,20 +156,14 @@ class PricingCreateView(generic.View):
 	def post(self, request):
 		form = PricingForm(request.POST)
 		if form.is_valid():
-			hospital = form.save(commit=False)
-			hospital.save()
-
-			# for hospital in form.cleaned_data:
-			# 	HospitalPricing.objects.create(hospital=hospital, pricing=pricing)
-			# return redirect(hospital) # shortcut to object's get_absolute_url()
-			return HttpResponseRedirect(hospital.get_absolute_url())
+			pricing = form.save(commit=False)
+			pricing.save()
+			return HttpResponseRedirect(pricing.get_absolute_url())
 		return render(request, 'hospital_pricing/pricing_new.html', {'form': form})
 
 	def get(self, request):
 		form = PricingForm()
 		return render(request, 'hospital_pricing/pricing_new.html', {'form': form})
-
-
 
 
 @method_decorator(login_required, name='dispatch')
@@ -189,12 +187,12 @@ class HospitalUpdateView(generic.UpdateView):
 		hospital.save()
 
 		# Current pricing_id values linked to site
-		old_ids = Hospital.objects\
-			.values_list('hospital_id', flat=True)\
-			.filter(hospital_id=hospital_id)
+		# old_ids = Hospital.objects\
+		# 	.values_list('hospital_id', flat=True)\
+		# 	.filter(hospital_id=hospital_id)
 
 		# New hospital list
-		new_hospital = form.cleaned_data['hospital_id']
+		# new_hospital = form.cleaned_data['hospital_id']
 
 		# TODO can these loops be refactored?
 
@@ -239,45 +237,10 @@ class PricingUpdateView(generic.UpdateView):
 
 	def form_valid(self, form):
 		pricing = form.save(commit=False)
-		print(form.cleaned_data.keys())
-		# hospital.updated_by = self.request.user
-		# hospital.date_updated = timezone.now()
 		pricing.save()
 
-		# Current pricing_id values linked to site
-		old_ids = Pricing.objects\
-			.values_list('pricing_id', flat=True)\
-			.filter(pricing_id=pricing_id)
-
-		# New hospital list
-		new_price = form.cleaned_data['pricing_id']
-
-		# TODO can these loops be refactored?
-
-		# New ids
-		new_ids = []
-
-		# Insert new unmatched country entries
-		for price in new_price:
-			new_id = price.pricing_id
-			new_ids.append(new_id)
-			if new_id in old_ids:
-				continue
-			else:
-				Pricing.objects \
-					.create(drg_code=drg_code_id, hospital=hospital.hospital_id)
-
-		# Delete old unmatched country entries
-		for old_id in old_ids:
-			if old_id in new_ids:
-				continue
-			else:
-				Pricing.objects \
-					.filter(hospital_id=hospital.hospital_id, pricing_id=old_id) \
-					.delete()
-
 		return HttpResponseRedirect(pricing.get_absolute_url())
-		# return redirect('hospital/hospital_detail', pk=site.pk)
+
 
 @method_decorator(login_required, name='dispatch')
 class HospitalDeleteView(generic.DeleteView):

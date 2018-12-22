@@ -12,69 +12,30 @@
   <!-- novalidate attribute required to render validation messages -->
   <form method="post" novalidate>
     {% csrf_token %}
-<!-- 
-    {{ form.field|as_crispy_field }} -->
 
-
-    
-    {{form | crispy }}
- <!-- {% if price.price %}
-    <div class="row">
-      <div class="col-6">
-        {{ form.drg_code|as_crispy_field }}
+      {% if form.hospital %}
+      <div class="row">
+        <div class="col-6">
+          {{ form.hospital|as_crispy_field }}
+        </div>
       </div>
-    </div>
-  {% endif %}
+      {% endif %}
 
+     {% if form.drg_code %}
+        <div class="row">
+          <div class="col-6">
+            {{ form.drg_code|as_crispy_field }}
+          </div>
+        </div>
+      {% endif %}
 
- {% if price.price %}
-    <div class="row">
-      <div class="col-6">
-        {{ form.pricing_id|as_crispy_field }}
-      </div>
-    </div>
-  {% endif %}
-
-  {% if price %}
-    <div class="row">
-       <div class="col-6">
-        {{ form.price|as_crispy_field }}
-      </div>
-    </div>
-  {% endif %}
- -->
-
-<!-- 
-
-
-
-    <div class="row">
-      <div class="col-6">
-        {{ form.state|as_crispy_field }}
-      </div>
-    </div>
-
-
-    <div class="row">
-      <div class="col-6">
-        {{ form.zip_code|as_crispy_field }}
-      </div>
-    </div>
-
-
-    <div class="row">
-      <div class="col-6">
-        {{ form.hospital_ownership|as_crispy_field }}
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-6">
-        {{ form.hospital_quality_score|as_crispy_field }}
-      </div>
-    </div> -->
-
-
+      {% if form.price %}
+        <div class="row">
+           <div class="col-6">
+            {{ form.price|as_crispy_field }}
+          </div>
+        </div>
+      {% endif %}
 
   <button type="submit" class="btn btn-outline-success">Update</button>
   <!-- Restore missing button -->  

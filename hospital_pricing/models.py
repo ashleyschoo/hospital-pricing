@@ -64,12 +64,17 @@ class Hospital(models.Model):
     hospital_ownership = models.ForeignKey('HospitalOwnership', models.DO_NOTHING, blank=True, null=True)
     hospital_quality_score = models.ForeignKey('HospitalQualityScore', models.DO_NOTHING, blank=True, null=True)
     # intermediate model (hospital -> hospital_pricing -> pricing)
-    drg_codes = models.ManyToManyField('DRGCode', through='Pricing')
+    drg_codes = models.ManyToManyField(
+        'DRGCode',
+        through='Pricing',
+        blank=True,
+        related_name='hospitals'
+    )
 
     class Meta:
         managed = False
         db_table = 'hospital'
-        ordering = ['hospital_provider_identifier']
+        ordering = ['hospital_name']
         verbose_name = 'U.S. Hospital'
         verbose_name_plural = 'U.S. Hospitals'
 
@@ -99,8 +104,6 @@ class Hospital(models.Model):
     #             names.append(name)
     #     return ', '.join(names)
 
-    
-    
 
 class HospitalOwnership(models.Model):
     hospital_ownership_id = models.AutoField(primary_key=True)
@@ -114,9 +117,6 @@ class HospitalOwnership(models.Model):
 
     def __str__(self):
         return self.hospital_ownership_description
-
-
-
 
 
 class HospitalQualityScore(models.Model):
@@ -145,9 +145,14 @@ class Pricing(models.Model):
         db_table = 'pricing'
         ordering = ['pricing_id']
         verbose_name = 'Pricing'
+
     def __str__(self):
         price = str(self.price)
         return price
+
+    def get_absolute_url(self):
+        return reverse('pricing_detail', kwargs={'pk': self.pk})
+
 
 class DRGCode(models.Model):
     drg_code_id = models.AutoField(primary_key=True)
@@ -157,7 +162,7 @@ class DRGCode(models.Model):
     class Meta:
         managed = False
         db_table = 'drg_code'
-        ordering = ['drg_code_id']
+        ordering = ['drg_code']
         verbose_name = 'DRG Code'
         verbose_name_plural = 'DRG Codes'
 
