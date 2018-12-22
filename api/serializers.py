@@ -30,23 +30,19 @@ class ZipCodeSerializer(serializers.ModelSerializer):
 		model = ZipCode
 		fields = ('zip_code_id', 'zip_code')
 
+
 class HospitalOwnershipSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = HospitalOwnership
 		fields = ('hospital_ownership_id', 'hospital_ownership_description')
 
+
 class HospitalQualityScoreSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = HospitalQualityScore
 		fields = ('hospital_quality_score_id', 'hospital_quality_score')
-
-
-
-
-
-
 
 
 class HospitalSerializer(serializers.ModelSerializer):
@@ -229,109 +225,36 @@ class HospitalSerializer(serializers.ModelSerializer):
 		# 			.filter(hospital_id=hospital_id, pricing_id=old_id) \
 		# 			.delete()
 
-		# return instance
-
-
-
-
-
-# make like heritagesitejuristdiction serializer 
-# look at serializers.listfield
-
-
-# https://www.django-rest-framework.org/api-guide/serializers/#listserializer
-# class PricingListSerializer(serializers.ListSerializer):
-# 	def create(self, validated_data):
-# 		price = [Pricing(**item) for item in validated_data]
-# 		return Pricing.objects.bulk_create(price)
-
-# class PricingSerializer(serializers.Serializer):
-# 	# prices_list = PricesSerializer(
-# 	# 	many=False,
-# 	# 	read_only=False
-# 	# 	)
-# 	# prices_id = serializers.PrimaryKeyRelatedField(
-# 	# 	many=True,
-# 	# 	write_only=True,
-# 	# 	)
-# 	# prices = serializers.DictField(
-# 	# 	child=serializers.CharField(allow_blank=False)
-# 	# 	)
-
-# 	class Meta:
-# 		list_serializer_class = PricingListSerializer
-# 		# model = Pricing
-# 		# fields = (
-# 		# 	prices
-# 		# 	)
-
-# 	def create():
-# 		prices = validated_data.pop('prices')
-# 		if prices is not None:
-# 			for price in prices:
-# 				Pricing.objects.create(hospital_id=price[0],drg_code=price[1],price=price[2])
-
+		return instance
+	
 
 class PricingSerializer(serializers.Serializer):
-	hospital_id = serializers.CharField()
-	drg_code = serializers.CharField()
-	price = serializers.CharField()
+	hospital_id = serializers.IntegerField()
+	drg_code_id = serializers.IntegerField()
+	price = serializers.DecimalField(max_digits=10, decimal_places=2)
 
 	class Meta:
 		model = Pricing
-		fields = (
+		fields = ('hospital_id', 'drg_code_id', 'price')
+
+	def create(self, validated_data):
+		price = Pricing.objects.create(**validated_data)
+
+		return price
+
+	def update(self, instance, validated_data):
+		instance.hospital_id = validated_data.get(
 			'hospital_id',
-			'drg_code',
-			'price'
-			)
-
-	def create():
-		prices = validated_data.pop('prices')
-		if prices is not None:
-			for price in prices:
-				Pricing.objects.create(hospital_id=price[0],drg_code=price[1],price=price[2])
-
-
-
-
-
-# look at heritagesites update queryset that gets the existing pricing.objects.create.filter by hospital_id
-# open dictionary, dig out hospital_id, delete curret entries for hospital_id in pricing table and
-# replace it with the new info, api is a replacement api
-
-
-	def update():
-
-		prices = validated_data.pop('prices')
-		if prices is not None:
-			for price in prices:
-				Pricing.objects.create(hospital_id=price[0],drg_code=price[1],price=price[2])
-
-		# If any existing country/areas are not in updated list, delete them
-		new_ids = []
-		old_ids = Pricing.objects \
-			.values_list('pricing', flat=True) \
-			.filter(pricing_id__exact=pricing)
-
-		# TODO Insert may not be required (Just return instance)
-
-		# Insert new unmatched country entries
-		for price in new_prices:
-			new_id = pricing.price_id
-			new_ids.append(new_id)
-			if new_id in old_ids:
-				continue
-			else:
-				Pricing.objects \
-					.create(pricing_id=pricing, drg_code_id=new_id)
-
-		# Delete old unmatched country entries
-		for old_id in old_ids:
-			if old_id in new_ids:
-				continue
-			else:
-				Pricing.objects \
-					.filter(pricing_id=pricing, drg_code_id=old_id) \
-					.delete()
+			instance.hospital_id
+		)
+		instance.drg_code_id = validated_data.get(
+			'drg_code_id',
+			instance.drg_code_id
+		)
+		instance.price = validated_data.get(
+			'price',
+			instance.price
+		)
+		instance.save()
 
 		return instance

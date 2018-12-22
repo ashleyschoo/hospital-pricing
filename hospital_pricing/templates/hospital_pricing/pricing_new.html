@@ -1,7 +1,7 @@
 {% extends 'hospital_pricing/base.html' %}
 
 {% load crispy_forms_tags %}
-{{ form.field|as_crispy_field }}
+
 {% block content %}
 
   <header>
@@ -11,25 +11,30 @@
   <!-- novalidate attribute required to render validation messages -->
   <form method="post" novalidate>
     {% csrf_token %}
-    {{form | crispy }}
 
-<!--     <div class="row">
-      <div class="col-6">
-        {{ form.hospital_id|as_crispy_field }}
-      </div>
-    </div>
-
+    {% if form.hospital %}
     <div class="row">
       <div class="col-6">
-        {{ form.price |as_crispy_field }}
+        {{ form.hospital|as_crispy_field }}
       </div>
     </div>
+    {% endif %}
 
+    {% if form.drg_code %}
     <div class="row">
       <div class="col-6">
         {{ form.drg_code|as_crispy_field }}
       </div>
-    </div> -->
+    </div>
+    {% endif %}
+
+    {% if form.price %}
+    <div class="row">
+      <div class="col-6">
+        {{ form.price|as_crispy_field }}
+      </div>
+    </div>
+    {% endif %}
 
 
     <button type="submit" class="btn btn-outline-success">Add</button>
