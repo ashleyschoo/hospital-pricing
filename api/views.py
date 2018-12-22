@@ -26,7 +26,13 @@ class HospitalViewSet(viewsets.ModelViewSet):
 	"""
 	This ViewSet provides both 'list' and 'detail' views.
 	"""
-	queryset = Hospital.objects.select_related('city','state','zip_code','hospital_quality_score','hospital_ownership').order_by('hospital.hospital_id')
+	queryset = Hospital.objects.select_related(
+		'city',
+		'state',
+		'zip_code',
+		'hospital_quality_score',
+		'hospital_ownership'
+	).order_by('hospital.hospital_id')
 	serializer_class = HospitalSerializer
 	permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
